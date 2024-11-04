@@ -253,26 +253,6 @@ static bool is_assigned(dirtyt &dirty, const irep_idt &ident, assignst assigns)
   return false;
 }
 
-/// Collect identifiers that are local to this loop only
-/// (excluding nested loop).
-static std::unordered_set<irep_idt> gen_loop_locals_set(
-  const dfcc_loop_nesting_grapht &loop_nesting_graph,
-  const std::size_t loop_id)
-{
-  std::unordered_set<irep_idt> loop_locals;
-  for(const auto &target : loop_nesting_graph[loop_id].instructions)
-  {
-    auto loop_id_opt = dfcc_get_loop_id(target);
-    if(
-      target->is_decl() && loop_id_opt.has_value() &&
-      loop_id_opt.value() == loop_id)
-    {
-      loop_locals.insert(target->decl_symbol().get_identifier());
-    }
-  }
-  return loop_locals;
-}
-
 /// Compute subset of locals that must be tracked in the loop's write set.
 /// A local must be tracked if it is dirty or if it may be assigned by one
 /// of the inner loops.
@@ -329,6 +309,7 @@ static struct contract_clausest default_loop_contract_clauses(
   const dfcc_loop_nesting_grapht &loop_nesting_graph,
   const std::size_t loop_id,
   const irep_idt &function_id,
+  goto_functiont &goto_function,
   local_may_aliast &local_may_alias,
   const bool check_side_effect,
   message_handlert &message_handler,
@@ -381,7 +362,7 @@ static struct contract_clausest default_loop_contract_clauses(
     {
       // infer assigns clause targets if none given
       auto inferred = dfcc_infer_loop_assigns(
-        local_may_alias, loop.instructions, loop.head->source_location(), ns);
+        local_may_alias, goto_function, loop, message_handler, ns);
       log.warning() << "No assigns clause provided for loop " << function_id
                     << "." << loop.latch->loop_number << " at "
                     << loop.head->source_location() << ". The inferred set {";
@@ -416,6 +397,7 @@ static dfcc_loop_infot gen_dfcc_loop_info(
   const dfcc_loop_nesting_grapht &loop_nesting_graph,
   const std::size_t loop_id,
   const irep_idt &function_id,
+  goto_functiont &goto_function,
   const std::map<std::size_t, dfcc_loop_infot> &loop_info_map,
   dirtyt &dirty,
   local_may_aliast &local_may_alias,
@@ -424,8 +406,25 @@ static dfcc_loop_infot gen_dfcc_loop_info(
   dfcc_libraryt &library,
   symbol_table_baset &symbol_table)
 {
-  std::unordered_set<irep_idt> loop_locals =
-    gen_loop_locals_set(loop_nesting_graph, loop_id);
+  const namespacet ns(symbol_table);
+  std::unordered_set<irep_idt> loop_locals = gen_loop_locals_set(
+    function_id,
+    goto_function,
+    loop_nesting_graph[loop_id],
+    message_handler,
+    ns);
+
+  // Exclude locals of inner nested loops.
+  for(const auto &inner_loop : loop_nesting_graph.get_predecessors(loop_id))
+  {
+    INVARIANT(
+      loop_info_map.find(inner_loop) != loop_info_map.end(),
+      "DFCC should gen_dfcc_loop_info for inner loops first.");
+    for(const auto &inner_local : loop_info_map.at(inner_loop).local)
+    {
+      loop_locals.erase(inner_local);
+    }
+  }
 
   std::unordered_set<irep_idt> loop_tracked = gen_tracked_set(
     loop_nesting_graph.get_predecessors(loop_id),
@@ -433,11 +432,11 @@ static dfcc_loop_infot gen_dfcc_loop_info(
     dirty,
     loop_info_map);
 
-  const namespacet ns(symbol_table);
   struct contract_clausest contract_clauses = default_loop_contract_clauses(
     loop_nesting_graph,
     loop_id,
     function_id,
+    goto_function,
     local_may_alias,
     check_side_effect,
     message_handler,
@@ -559,6 +558,7 @@ dfcc_cfg_infot::dfcc_cfg_infot(
          loop_nesting_graph,
          loop_id,
          function_id,
+         goto_function,
          loop_info_map,
          dirty,
          local_may_alias,
