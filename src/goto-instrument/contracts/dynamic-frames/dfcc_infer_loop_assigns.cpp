@@ -262,7 +262,9 @@ static assignst dfcc_infer_loop_assigns_for_loop(
     {
       address_of_exprt address_of_expr(expr);
       address_of_expr.add_source_location() = expr.source_location();
-      if(!is_constant(address_of_expr))
+      // Widen assigns targets to object_whole if `expr` is a dereference or
+      // with constant address.
+      if(expr.id() == ID_dereference || !is_constant(address_of_expr))
       {
         // Target address is not constant, widening to the whole object
         result.emplace(make_object_whole_call_expr(address_of_expr, ns));
