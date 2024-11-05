@@ -399,6 +399,7 @@ void dfcc_instrumentt::instrument_goto_program(
 
   // build control flow graph information
   dfcc_cfg_infot cfg_info(
+    goto_model,
     function_id,
     goto_function,
     write_set,
@@ -448,6 +449,7 @@ void dfcc_instrumentt::instrument_goto_function(
 
   // build control flow graph information
   dfcc_cfg_infot cfg_info(
+    goto_model,
     function_id,
     goto_function,
     write_set,
