@@ -37,6 +37,17 @@ extractbits_exprt::extractbits_exprt(
   add_to_operands(std::move(_src), from_integer(_index, integer_typet()));
 }
 
+update_bit_exprt::update_bit_exprt(
+  exprt _src,
+  const std::size_t _index,
+  exprt _new_value)
+  : update_bit_exprt(
+      std::move(_src),
+      from_integer(_index, integer_typet()),
+      std::move(_new_value))
+{
+}
+
 exprt update_bit_exprt::lower() const
 {
   const auto width = to_bitvector_type(type()).get_width();
@@ -54,7 +65,8 @@ exprt update_bit_exprt::lower() const
     typecast_exprt(src(), src_bv_type), bitnot_exprt(mask_shifted));
 
   // zero-extend the replacement bit to match src
-  auto new_value_casted = zero_extend_exprt{new_value(), src_bv_type};
+  auto new_value_bv = typecast_exprt{new_value(), bv_typet{1}};
+  auto new_value_casted = zero_extend_exprt{new_value_bv, src_bv_type};
 
   // shift the replacement bits
   auto new_value_shifted = shl_exprt(new_value_casted, index());
