@@ -1,3 +1,27 @@
+# CBMC 6.4.0
+
+This release improves upon automated assigns-clause inference for loop invariants, which should make manually adding assigns clauses to loops less frequent.
+
+## What's Changed
+* [CONTRACTS] Support alias of member pointers in loop assigns inference by @qinheping in https://github.com/diffblue/cbmc/pull/8486
+* [CONTRACTS] Detect loop locals with goto_rw in DFCC by @qinheping in https://github.com/diffblue/cbmc/pull/8489
+* [CONTRACTS] DFCC loop assigns infererence with functions inlined by @qinheping in https://github.com/diffblue/cbmc/pull/8490
+
+## Bug Fixes
+* SMT2: implement range type by @kroening in https://github.com/diffblue/cbmc/pull/8466
+* Man pages: improve wording of unwinding-related options by @tautschnig in https://github.com/diffblue/cbmc/pull/8471
+* `format_type` can now format `range_typet` by @kroening in https://github.com/diffblue/cbmc/pull/8473
+* Contracts: document use of __CPROVER_loop_entry with arrays by @tautschnig in https://github.com/diffblue/cbmc/pull/8470
+* `bitvector_typet`: set width from mp_integer by @kroening in https://github.com/diffblue/cbmc/pull/8477
+* CI: add macos-14 (macOS on M1) job by @tautschnig in https://github.com/diffblue/cbmc/pull/8382
+* Remove macos-12 CI job by @tautschnig in https://github.com/diffblue/cbmc/pull/8482
+* [CONTRACTS] Support alias of member pointers in loop assigns inference by @qinheping in https://github.com/diffblue/cbmc/pull/8486
+* zero extension expression by @kroening in https://github.com/diffblue/cbmc/pull/8442
+* [CONTRACTS] Detect loop locals with goto_rw in DFCC by @qinheping in https://github.com/diffblue/cbmc/pull/8489
+* [CONTRACTS] DFCC loop assigns infererence with functions inlined by @qinheping in https://github.com/diffblue/cbmc/pull/8490
+
+**Full Changelog**: https://github.com/diffblue/cbmc/compare/cbmc-6.3.1...cbmc-6.4.0
+
 # CBMC 6.3.1
 
 This patch release addresses build failures on Apple Silicon (via PR #8461).
