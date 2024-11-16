@@ -950,9 +950,10 @@ simplify_exprt::simplify_typecast(const typecast_exprt &expr)
     {
       irep_idt op_id = expr.op().id();
 
-      if(op_id==ID_plus || op_id==ID_minus || op_id==ID_mult ||
-         op_id==ID_unary_minus ||
-         op_id==ID_bitxor || op_id==ID_bitor || op_id==ID_bitand)
+      if(
+        op_id == ID_plus || op_id == ID_minus || op_id == ID_mult ||
+        op_id == ID_unary_minus || op_id == ID_bitxor || op_id == ID_bitxnor ||
+        op_id == ID_bitor || op_id == ID_bitand)
       {
         exprt result = expr.op();
 
@@ -2949,9 +2950,9 @@ simplify_exprt::resultt<> simplify_exprt::simplify_node(const exprt &node)
   {
     r = simplify_bitnot(to_bitnot_expr(expr));
   }
-  else if(expr.id()==ID_bitand ||
-          expr.id()==ID_bitor ||
-          expr.id()==ID_bitxor)
+  else if(
+    expr.id() == ID_bitand || expr.id() == ID_bitor || expr.id() == ID_bitxor ||
+    expr.id() == ID_bitxnor)
   {
     r = simplify_bitwise(to_multi_ary_expr(expr));
   }
