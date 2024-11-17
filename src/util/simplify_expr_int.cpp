@@ -745,6 +745,8 @@ simplify_exprt::simplify_bitwise(const multi_ary_exprt &expr)
       f = [](bool a, bool b) { return a || b; };
     else if(new_expr.id() == ID_bitxor)
       f = [](bool a, bool b) { return a != b; };
+    else if(new_expr.id() == ID_bitxnor)
+      f = [](bool a, bool b) { return a == b; };
     else
       UNREACHABLE;
 

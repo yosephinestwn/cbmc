@@ -190,6 +190,41 @@ inline bitxor_exprt &to_bitxor_expr(exprt &expr)
   return static_cast<bitxor_exprt &>(expr);
 }
 
+/// \brief Bit-wise XNOR
+class bitxnor_exprt : public multi_ary_exprt
+{
+public:
+  bitxnor_exprt(exprt _op0, exprt _op1)
+    : multi_ary_exprt(std::move(_op0), ID_bitxnor, std::move(_op1))
+  {
+  }
+};
+
+template <>
+inline bool can_cast_expr<bitxnor_exprt>(const exprt &base)
+{
+  return base.id() == ID_bitxnor;
+}
+
+/// \brief Cast an exprt to a \ref bitxnor_exprt
+///
+/// \a expr must be known to be \ref bitxnor_exprt.
+///
+/// \param expr: Source expression
+/// \return Object of type \ref bitxnor_exprt
+inline const bitxnor_exprt &to_bitxnor_expr(const exprt &expr)
+{
+  PRECONDITION(expr.id() == ID_bitxnor);
+  return static_cast<const bitxnor_exprt &>(expr);
+}
+
+/// \copydoc to_bitxnor_expr(const exprt &)
+inline bitxnor_exprt &to_bitxnor_expr(exprt &expr)
+{
+  PRECONDITION(expr.id() == ID_bitxnor);
+  return static_cast<bitxnor_exprt &>(expr);
+}
+
 /// \brief Bit-wise AND
 class bitand_exprt : public multi_ary_exprt
 {
