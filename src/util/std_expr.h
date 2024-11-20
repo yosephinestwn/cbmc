@@ -1110,6 +1110,11 @@ public:
     : multi_ary_exprt(std::move(_lhs), ID_mult, std::move(_rhs))
   {
   }
+
+  mult_exprt(exprt::operandst factors, typet type)
+    : multi_ary_exprt(ID_mult, std::move(factors), std::move(type))
+  {
+  }
 };
 
 template <>
