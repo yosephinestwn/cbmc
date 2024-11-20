@@ -2962,7 +2962,7 @@ simplify_exprt::resultt<> simplify_exprt::simplify_node(const exprt &node)
   }
   else if(expr.id()==ID_power)
   {
-    r = simplify_power(to_binary_expr(expr));
+    r = simplify_power(to_power_expr(expr));
   }
   else if(expr.id()==ID_plus)
   {

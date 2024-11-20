@@ -64,6 +64,7 @@ class plus_exprt;
 class pointer_object_exprt;
 class pointer_offset_exprt;
 class popcount_exprt;
+class power_exprt;
 class prophecy_pointer_in_range_exprt;
 class prophecy_r_or_w_ok_exprt;
 class refined_string_exprt;
@@ -163,7 +164,7 @@ public:
   [[nodiscard]] resultt<>
   simplify_floatbv_typecast(const floatbv_typecast_exprt &);
   [[nodiscard]] resultt<> simplify_shifts(const shift_exprt &);
-  [[nodiscard]] resultt<> simplify_power(const binary_exprt &);
+  [[nodiscard]] resultt<> simplify_power(const power_exprt &);
   [[nodiscard]] resultt<> simplify_bitwise(const multi_ary_exprt &);
   [[nodiscard]] resultt<> simplify_if_preorder(const if_exprt &expr);
   [[nodiscard]] resultt<> simplify_if(const if_exprt &);
