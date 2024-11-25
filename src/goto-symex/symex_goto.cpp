@@ -26,6 +26,8 @@ Author: Daniel Kroening, kroening@kroening.com
 #include "path_storage.h"
 
 #include <algorithm>
+#include <iostream>
+#include <cstdio>
 
 void goto_symext::apply_goto_condition(
   goto_symex_statet &current_state,
@@ -229,6 +231,7 @@ renamedt<exprt, L2> try_evaluate_pointer_comparisons(
 
 void goto_symext::symex_goto(statet &state)
 {
+  printf("Symex-Goto is called\n");
   PRECONDITION(state.reachable);
 
   const goto_programt::instructiont &instruction=*state.source.pc;
