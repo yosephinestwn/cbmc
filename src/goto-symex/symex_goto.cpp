@@ -289,6 +289,11 @@ void goto_symext::symex_goto(statet &state)
     return;
   }
 
+  goto_programt::const_targett new_state_pc, state_pc;
+  new_state_pc=goto_target;
+  state_pc=state.source.pc;
+  state_pc++;
+
   // Save path information for exploration
 
   if(symex_config.doing_path_exploration){
@@ -307,8 +312,7 @@ void goto_symext::symex_goto(statet &state)
     return;
   }
 
-  framet::goto_state_listt &goto_state_list =
-  state.call_stack().top().goto_state_map[new_state_pc];
+  //framet::goto_state_listt &goto_state_list = state.call_stack().top().goto_state_map[new_state_pc];
 
   traces[traces_idx] = pointer; //here
   traces_idx++;
