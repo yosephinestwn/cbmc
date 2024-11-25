@@ -29,6 +29,10 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <iostream>
 #include <cstdio>
 
+int traces[100];
+int traces_idx = 0;
+int pointer = 0;
+
 void goto_symext::apply_goto_condition(
   goto_symex_statet &current_state,
   goto_statet &jump_taken_state,
@@ -229,7 +233,93 @@ renamedt<exprt, L2> try_evaluate_pointer_comparisons(
   return condition;
 }
 
+void print_trace(){
+  std::cout << "Traces: ";
+
+  for(int i = 0; i < traces_idx; i++){
+    std::cout << traces[i];
+  }
+
+  std::cout << "\n" << std::endl;
+}
+
+// symex_goto without new_guard
 void goto_symext::symex_goto(statet &state)
+{
+  printf("Symex-Goto is called\n");
+  PRECONDITION(state.reachable);
+  const goto_programt::instructiont &instruction = *state.source.pc;
+
+  //Follow the next instruction regardless of new_guard
+
+  traces[traces_idx] = pointer; //here
+  pointer++;
+  traces_idx++;
+
+  symex_transition(state);
+
+  // Goto target and next instruction
+  goto_programt::const_targett goto_target = instruction.get_target();
+
+  bool backward = instruction.is_backwards_goto();
+
+  if(backward){
+    exprt new_guard = clean_expr(instruction.condition(), state, false);
+    const auto loop_id =
+    goto_programt::loop_id(state.source.function_id, *state.source.pc);
+    unsigned &unwind = state.call_stack().top().loop_iterations[loop_id].count;
+    unwind++;
+
+    if(should_stop_unwind(state.source, state.call_stack(), unwind)){
+      loop_bound_exceeded(state, new_guard);
+
+      traces[traces_idx] = pointer; //here
+      traces_idx++;
+      pointer++;
+
+      symex_transition(state);
+      return;
+    }
+
+    traces[traces_idx] = pointer; //here
+    traces_idx++;
+
+    symex_transition(state, goto_target, true);
+
+    return;
+  }
+
+  // Save path information for exploration
+
+  if(symex_config.doing_path_exploration){
+    path_storaget::patht next_instruction(target, state);
+    next_instruction.state.saved_target = state_pc;
+    next_instruction.state.has_saved_next_instruction = true;
+
+    path_storaget::patht jump_target(target, state);
+    jump_target.state.saved_target = new_state_pc;
+    jump_target.state.has_saved_jump_target = true;
+
+    path_storage.push(next_instruction);
+    path_storage.push(jump_target);
+
+    should_pause_symex = true;
+    return;
+  }
+
+  framet::goto_state_listt &goto_state_list =
+  state.call_stack().top().goto_state_map[new_state_pc];
+
+  traces[traces_idx] = pointer; //here
+  traces_idx++;
+  pointer++;
+
+  symex_transition(state, state_pc, backward);
+  print_trace();
+  return;
+}
+
+/*void goto_symext::symex_goto(statet &state)
 {
   printf("Symex-Goto is called\n");
   PRECONDITION(state.reachable);
@@ -542,7 +632,7 @@ void goto_symext::symex_goto(statet &state)
       }
     }
   }
-}
+}*/
 
 void goto_symext::symex_unreachable_goto(statet &state)
 {
