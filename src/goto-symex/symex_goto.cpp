@@ -317,6 +317,7 @@ void goto_symext::symex_goto(statet &state)
   symex_transition(state, state_pc, backward);
   print_trace();
   traces.clear();
+  pointer = 0; //reset pointer
   return;
 }
 
