@@ -237,7 +237,7 @@ void print_trace(){
   std::cout << "Traces: ";
 
   for(int i = 0; i < traces_idx; i++){
-    std::cout << traces[i];
+    std::cout << traces[i] << " ";
   }
 
   std::cout << "\n" << std::endl;
