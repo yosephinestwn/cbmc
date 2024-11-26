@@ -28,9 +28,9 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <algorithm>
 #include <iostream>
 #include <cstdio>
+#include <list>
 
-int traces[100];
-int traces_idx = 0;
+std::list<int> traces;
 int pointer = 0;
 
 void goto_symext::apply_goto_condition(
@@ -236,8 +236,8 @@ renamedt<exprt, L2> try_evaluate_pointer_comparisons(
 void print_trace(){
   std::cout << "Traces: ";
 
-  for(int i = 0; i < traces_idx; i++){
-    std::cout << traces[i] << " ";
+  for(int i : traces){
+    std::cout << i << " ";
   }
 
   std::cout << "\n" << std::endl;
@@ -252,9 +252,8 @@ void goto_symext::symex_goto(statet &state)
 
   //Follow the next instruction regardless of new_guard
 
-  traces[traces_idx] = pointer; //here
+  traces.push_back(pointer); //here
   pointer++;
-  traces_idx++;
 
   symex_transition(state);
 
@@ -273,16 +272,14 @@ void goto_symext::symex_goto(statet &state)
     if(should_stop_unwind(state.source, state.call_stack(), unwind)){
       loop_bound_exceeded(state, new_guard);
 
-      traces[traces_idx] = pointer; //here
-      traces_idx++;
+      traces.push_back(pointer); //here
       pointer++;
 
       symex_transition(state);
       return;
     }
 
-    traces[traces_idx] = pointer; //here
-    traces_idx++;
+    traces.push_back(pointer); // here
 
     symex_transition(state, goto_target, true);
 
@@ -314,12 +311,12 @@ void goto_symext::symex_goto(statet &state)
 
   //framet::goto_state_listt &goto_state_list = state.call_stack().top().goto_state_map[new_state_pc];
 
-  traces[traces_idx] = pointer; //here
-  traces_idx++;
+  traces.push_back(pointer); //here
   pointer++;
 
   symex_transition(state, state_pc, backward);
   print_trace();
+  traces.clear();
   return;
 }
 
