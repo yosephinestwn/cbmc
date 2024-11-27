@@ -300,7 +300,7 @@ void goto_symext::symex_goto(statet &state)
 
   // Handle forward paths: Choose the next instruction or saved paths
   if (!path_storage.empty()) {
-    auto next_path = path_storage.top();
+    auto next_path = path_storage.peek();
     path_storage.pop();
 
     // Restore state and follow saved target
