@@ -268,6 +268,7 @@ void goto_symext::symex_goto(statet &state)
     goto_programt::loop_id(state.source.function_id, *state.source.pc);
     unsigned &unwind = state.call_stack().top().loop_iterations[loop_id].count;
     unwind++;
+    std::cout << "Unwind: " << undwind << "\n" << std::endl;
 
     if(should_stop_unwind(state.source, state.call_stack(), unwind)){
       loop_bound_exceeded(state, new_guard);
@@ -311,10 +312,11 @@ void goto_symext::symex_goto(statet &state)
 
   //framet::goto_state_listt &goto_state_list = state.call_stack().top().goto_state_map[new_state_pc];
 
+  state.source.pc = new_state_pc;
+
   traces.push_back(pointer); //here
   pointer++;
 
-  symex_transition(state, state_pc, false);
   print_trace();
   traces.clear();
   pointer = 0; //reset pointer
