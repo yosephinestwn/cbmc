@@ -324,6 +324,10 @@ void print_trace(){
 void goto_symext::symex_goto(statet &state)
 {
   printf("Symex-Goto is called\n");
+
+  traces.push_back(pointer);
+  pointer++;
+
   PRECONDITION(state.reachable);
 
   const goto_programt::instructiont &instruction=*state.source.pc;
@@ -343,6 +347,10 @@ void goto_symext::symex_goto(statet &state)
 
     // next instruction
     symex_transition(state);
+
+    traces.push_back(pointer);
+    pointer++;
+
     return; // nothing to do
   }
 
@@ -359,8 +367,7 @@ void goto_symext::symex_goto(statet &state)
     instruction.get_target();
 
   const bool backward = instruction.is_backwards_goto();
-  traces.push_back(pointer);
-  pointer++;
+
 
   if(backward)
   {
@@ -644,6 +651,7 @@ void goto_symext::symex_goto(statet &state)
       }
     }
   }
+
   print_trace();
   pointer = 0;
   traces.clear();
