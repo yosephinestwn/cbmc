@@ -299,7 +299,7 @@ void goto_symext::symex_goto(statet &state)
   }
 
   // Handle forward paths: Choose the next instruction or saved paths
-  if (!path_storage.empty()) {
+  /*if (!path_storage.empty()) {
     auto next_path = path_storage.peek();
     path_storage.pop();
 
@@ -307,7 +307,7 @@ void goto_symext::symex_goto(statet &state)
     state = next_path.state;
     symex_transition(state, state.saved_target, next_path.state.has_saved_jump_target);
     return;
-  }
+  }*/
 
   // Default case: Proceed to the next instruction
   state.source.pc = state_pc;
