@@ -263,6 +263,7 @@ void goto_symext::symex_goto(statet &state)
   bool backward = instruction.is_backwards_goto();
 
   if(backward){
+    printf("Is backward\n");
     exprt new_guard = clean_expr(instruction.condition(), state, false);
     const auto loop_id =
     goto_programt::loop_id(state.source.function_id, *state.source.pc);
