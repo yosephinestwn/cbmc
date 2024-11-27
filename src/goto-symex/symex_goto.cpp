@@ -244,7 +244,7 @@ void print_trace(){
 }
 
 // symex_goto without new_guard
-void goto_symext::symex_goto(statet &state)
+/*void goto_symext::symex_goto(statet &state)
 {
   printf("Symex-Goto is called\n");
   PRECONDITION(state.reachable);
@@ -299,7 +299,7 @@ void goto_symext::symex_goto(statet &state)
   }
 
   // Handle forward paths: Choose the next instruction or saved paths
-  /*if (!path_storage.empty()) {
+  if (!path_storage.empty()) {
     auto next_path = path_storage.peek();
     path_storage.pop();
 
@@ -307,7 +307,7 @@ void goto_symext::symex_goto(statet &state)
     state = next_path.state;
     symex_transition(state, state.saved_target, next_path.state.has_saved_jump_target);
     return;
-  }*/
+  }
 
   // Default case: Proceed to the next instruction
   state.source.pc = state_pc;
@@ -318,10 +318,10 @@ void goto_symext::symex_goto(statet &state)
   traces.clear();
 
   return;
-}
+}*/
 
 
-/*void goto_symext::symex_goto(statet &state)
+void goto_symext::symex_goto(statet &state)
 {
   printf("Symex-Goto is called\n");
   PRECONDITION(state.reachable);
@@ -359,6 +359,8 @@ void goto_symext::symex_goto(statet &state)
     instruction.get_target();
 
   const bool backward = instruction.is_backwards_goto();
+  traces.push_back(pointer);
+  pointer++;
 
   if(backward)
   {
@@ -398,11 +400,14 @@ void goto_symext::symex_goto(statet &state)
 
     unsigned &unwind = state.call_stack().top().loop_iterations[loop_id].count;
     unwind++;
+    std::cout << "Unwind " << unwind << std::endl;
 
     if(should_stop_unwind(state.source, state.call_stack(), unwind))
     {
       // we break the loop
       loop_bound_exceeded(state, new_guard);
+      traces.push_back(pointer);
+      pointer++;
 
       // next instruction
       symex_transition(state);
@@ -411,6 +416,7 @@ void goto_symext::symex_goto(statet &state)
 
     if(new_guard.is_true())
     {
+      traces.push_back(pointer);
       // we continue executing the loop
       if(check_break(loop_id, unwind))
       {
@@ -456,6 +462,8 @@ void goto_symext::symex_goto(statet &state)
 
     if(state_pc==goto_target)
     {
+      traces.push_back(pointer);
+      pointer++;
       symex_transition(state, goto_target, false);
       return; // nothing else to do
     }
@@ -465,6 +473,8 @@ void goto_symext::symex_goto(statet &state)
     new_state_pc=state.source.pc;
     new_state_pc++;
     state_pc=goto_target;
+    traces.push_back(pointer);
+    pointer++;
   }
 
   // Normally the next instruction to execute would be state_pc and we save
@@ -634,7 +644,7 @@ void goto_symext::symex_goto(statet &state)
       }
     }
   }
-}*/
+}
 
 void goto_symext::symex_unreachable_goto(statet &state)
 {
