@@ -311,14 +311,14 @@ void goto_symext::symex_goto(statet &state)
 
   //framet::goto_state_listt &goto_state_list = state.call_stack().top().goto_state_map[new_state_pc];
 
-  traces.push_back(pointer); //here
-  pointer++;
+  if (state_pc != new_state_pc ){
+    traces.push_back(pointer);
+    pointer++;
+    symex_transition(state, state_pc, false);
+  }
 
-  symex_transition(state, state_pc, backward);
-  print_trace();
+  pointer = 0;
   traces.clear();
-  pointer = 0; //reset pointer
-  return;
 }
 
 /*void goto_symext::symex_goto(statet &state)
