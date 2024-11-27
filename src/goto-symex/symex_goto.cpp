@@ -268,7 +268,7 @@ void goto_symext::symex_goto(statet &state)
     goto_programt::loop_id(state.source.function_id, *state.source.pc);
     unsigned &unwind = state.call_stack().top().loop_iterations[loop_id].count;
     unwind++;
-    std::cout << "Unwind: " << undwind << "\n" << std::endl;
+    std::cout << "Unwind: " << unwind << "\n" << std::endl;
 
     if(should_stop_unwind(state.source, state.call_stack(), unwind)){
       loop_bound_exceeded(state, new_guard);
