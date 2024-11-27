@@ -644,7 +644,7 @@ void goto_symext::symex_goto(statet &state)
       }
     }
   }
-
+  print_trace();
   pointer = 0;
   traces.clear();
 }
