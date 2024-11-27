@@ -250,79 +250,76 @@ void goto_symext::symex_goto(statet &state)
   PRECONDITION(state.reachable);
   const goto_programt::instructiont &instruction = *state.source.pc;
 
-  //Follow the next instruction regardless of new_guard
-
-  traces.push_back(pointer); //here
-  pointer++;
-
+  // Follow the next instruction regardless of new_guard
   symex_transition(state);
+  traces.push_back(pointer);
+  pointer++;
 
   // Goto target and next instruction
   goto_programt::const_targett goto_target = instruction.get_target();
+  goto_programt::const_targett state_pc = state.source.pc;
+  state_pc++;
 
-  bool backward = instruction.is_backwards_goto();
-
-  if(backward){
+  // Handle backward branches (loops)
+  if (instruction.is_backwards_goto()) {
     printf("Is backward\n");
     exprt new_guard = clean_expr(instruction.condition(), state, false);
-    const auto loop_id =
-    goto_programt::loop_id(state.source.function_id, *state.source.pc);
+    const auto loop_id = goto_programt::loop_id(state.source.function_id, *state.source.pc);
     unsigned &unwind = state.call_stack().top().loop_iterations[loop_id].count;
     unwind++;
-    std::cout << "Unwind: " << unwind << "\n" << std::endl;
+    printf("Unwind: %u\n", unwind);
 
-    if(should_stop_unwind(state.source, state.call_stack(), unwind)){
+    if (should_stop_unwind(state.source, state.call_stack(), unwind)) {
       loop_bound_exceeded(state, new_guard);
-
-      traces.push_back(pointer); //here
+      traces.push_back(pointer);
       pointer++;
-
-      symex_transition(state);
       return;
     }
 
-    traces.push_back(pointer); // here
-
     symex_transition(state, goto_target, true);
-
+    traces.push_back(pointer);
     return;
   }
 
-  goto_programt::const_targett new_state_pc, state_pc;
-  new_state_pc=goto_target;
-  state_pc=state.source.pc;
-  state_pc++;
-
-  // Save path information for exploration
-
-  if(symex_config.doing_path_exploration){
+  // Path exploration: Save both next and goto target for later decision-making
+  if (symex_config.doing_path_exploration) {
     path_storaget::patht next_instruction(target, state);
     next_instruction.state.saved_target = state_pc;
     next_instruction.state.has_saved_next_instruction = true;
 
     path_storaget::patht jump_target(target, state);
-    jump_target.state.saved_target = new_state_pc;
+    jump_target.state.saved_target = goto_target;
     jump_target.state.has_saved_jump_target = true;
 
     path_storage.push(next_instruction);
     path_storage.push(jump_target);
 
-    should_pause_symex = true;
+    should_pause_symex = true; // Pause to allow later exploration
     return;
   }
 
-  //framet::goto_state_listt &goto_state_list = state.call_stack().top().goto_state_map[new_state_pc];
+  // Handle forward paths: Choose the next instruction or saved paths
+  if (!path_storage.empty()) {
+    auto next_path = path_storage.top();
+    path_storage.pop();
 
-  state.source.pc = new_state_pc;
+    // Restore state and follow saved target
+    state = next_path.state;
+    symex_transition(state, state.saved_target, next_path.state.has_saved_jump_target);
+    return;
+  }
 
-  traces.push_back(pointer); //here
-  pointer++;
-
+  // Default case: Proceed to the next instruction
+  state.source.pc = state_pc;
+  traces.push_back(pointer);
   print_trace();
+
+  pointer = 0;
   traces.clear();
-  pointer = 0; //reset pointer
+
   return;
 }
+
 
 /*void goto_symext::symex_goto(statet &state)
 {
