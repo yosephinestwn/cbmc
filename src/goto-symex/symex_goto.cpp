@@ -644,6 +644,9 @@ void goto_symext::symex_goto(statet &state)
       }
     }
   }
+
+  pointer = 0;
+  traces.clear();
 }
 
 void goto_symext::symex_unreachable_goto(statet &state)
