@@ -244,7 +244,7 @@ void print_trace(){
 }
 
 // symex_goto without new_guard
-/*void goto_symext::symex_goto(statet &state)
+void goto_symext::symex_goto(statet &state)
 {
   printf("Symex-Goto is called\n");
   PRECONDITION(state.reachable);
@@ -299,7 +299,7 @@ void print_trace(){
   }
 
   // Handle forward paths: Choose the next instruction or saved paths
-  if (!path_storage.empty()) {
+  /*if (!path_storage.empty()) {
     auto next_path = path_storage.peek();
     path_storage.pop();
 
@@ -307,7 +307,7 @@ void print_trace(){
     state = next_path.state;
     symex_transition(state, state.saved_target, next_path.state.has_saved_jump_target);
     return;
-  }
+  }*/
 
   // Default case: Proceed to the next instruction
   state.source.pc = state_pc;
@@ -318,10 +318,10 @@ void print_trace(){
   traces.clear();
 
   return;
-}*/
+}
 
 
-void goto_symext::symex_goto(statet &state)
+/*void goto_symext::symex_goto(statet &state)
 {
   printf("Symex-Goto is called\n");
 
@@ -655,7 +655,7 @@ void goto_symext::symex_goto(statet &state)
   print_trace();
   pointer = 0;
   traces.clear();
-}
+}*/
 
 void goto_symext::symex_unreachable_goto(statet &state)
 {
