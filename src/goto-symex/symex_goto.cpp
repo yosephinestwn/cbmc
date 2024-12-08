@@ -332,7 +332,7 @@ void goto_symext::symex_goto(statet &state)
 
   renamedt<exprt, L2> renamed_guard = state.rename(std::move(new_guard), ns);
   renamed_guard = try_evaluate_pointer_comparisons(
-    std::move(renamed_guard), state.value_set, language_mode, ns);
+    std::move(renamed_guar+d), state.value_set, language_mode, ns);
   if(symex_config.simplify_opt)
     renamed_guard.simplify(ns);
   new_guard = renamed_guard.get();
@@ -506,40 +506,37 @@ void goto_symext::symex_goto(statet &state)
     log.debug() << "Resuming from next instruction '"
                 << state_pc->source_location() << "'" << log.eom;
   }
+  else if(true)
+  {
+    // We should save both the instruction after this goto, and the target of
+    // the goto.
 
-  // We should save both the instruction after this goto, and the target of
-  // the goto.
-  //Always do path exploration
-  path_storaget::patht next_instruction(target, state);
-  next_instruction.state.saved_target = state_pc;
-  next_instruction.state.has_saved_next_instruction = true;
+    path_storaget::patht next_instruction(target, state);
+    next_instruction.state.saved_target = state_pc;
+    next_instruction.state.has_saved_next_instruction = true;
 
-  path_storaget::patht jump_target(target, state);
-  jump_target.state.saved_target = new_state_pc;
-  jump_target.state.has_saved_jump_target = true;
-  // `forward` tells us where the branch we're _currently_ executing is
-  // pointing to; this needs to be inverted for the branch that we're saving,
-  // so let its truth value for `backwards` be the same as ours for `forward`.
+    path_storaget::patht jump_target(target, state);
+    jump_target.state.saved_target = new_state_pc;
+    jump_target.state.has_saved_jump_target = true;
+    // `forward` tells us where the branch we're _currently_ executing is
+    // pointing to; this needs to be inverted for the branch that we're saving,
+    // so let its truth value for `backwards` be the same as ours for `forward`.
 
-  log.debug() << "Saving next instruction '"
-              << next_instruction.state.saved_target->source_location() << "'"
-              << log.eom;
-  log.debug() << "Saving jump target '"
-              << jump_target.state.saved_target->source_location() << "'"
-              << log.eom;
-  path_storage.push(next_instruction);
-  path_storage.push(jump_target);
+    log.debug() << "Saving next instruction '"
+                << next_instruction.state.saved_target->source_location() << "'"
+                << log.eom;
+    log.debug() << "Saving jump target '"
+                << jump_target.state.saved_target->source_location() << "'"
+                << log.eom;
+    path_storage.push(next_instruction);
+    path_storage.push(jump_target);
 
-  // It is now up to the caller of symex to decide which path to continue
-  // executing. Signal to the caller that states have been pushed (therefore
-  // symex has not yet completed and must be resumed), and bail out.
-  should_pause_symex = true;
-
-  std::cout << "  Saved Next Instruction at: "
-            << next_instruction.state.saved_target->source_location() << "\n";
-
-  std::cout << "  Saved Jump Target at: "
-            << jump_target.state.saved_target->source_location() << "\n";
+    // It is now up to the caller of symex to decide which path to continue
+    // executing. Signal to the caller that states have been pushed (therefore
+    // symex has not yet completed and must be resumed), and bail out.
+    should_pause_symex = true;
+    return;
+  }
 
   // put a copy of the current state into the state-queue, to be used by
   // merge_gotos when we visit new_state_pc
@@ -565,6 +562,24 @@ void goto_symext::symex_goto(statet &state)
     goto_state_list.emplace_back(state.source, state);
 
     symex_transition(state, state_pc, backward);
+
+    //Not needed since path exploration is always enabled
+    /*if(!symex_config.doing_path_exploration)
+    {
+      // This doesn't work for --paths (single-path mode) yet, as in multi-path
+      // mode we remove the implied constants at a control-flow merge, but in
+      // single-path mode we don't run merge_gotos.
+      auto &taken_state = backward ? state : goto_state_list.back().second;
+      auto &not_taken_state = backward ? goto_state_list.back().second : state;
+
+      apply_goto_condition(
+        state,
+        taken_state,
+        not_taken_state,
+        instruction.condition(),
+        new_guard,
+        ns);
+    }*/
 
     // produce new guard symbol
     exprt guard_expr;
@@ -629,6 +644,7 @@ void goto_symext::symex_goto(statet &state)
       }
     }
   }
+
 }
 
 
