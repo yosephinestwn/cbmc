@@ -397,30 +397,6 @@ void goto_symext::symex_goto(statet &state)
     }
   }
 
-  // Always perform path exploration
-  {
-    path_storaget::patht next_instruction(target, state);
-    next_instruction.state.saved_target = state_pc;
-    next_instruction.state.has_saved_next_instruction = true;
-
-    path_storaget::patht jump_target(target, state);
-    jump_target.state.saved_target = new_state_pc;
-    jump_target.state.has_saved_jump_target = true;
-
-    log.debug() << "Saving next instruction '"
-                << next_instruction.state.saved_target->source_location() << "'"
-                << log.eom;
-    log.debug() << "Saving jump target '"
-                << jump_target.state.saved_target->source_location() << "'"
-                << log.eom;
-    path_storage.push(next_instruction);
-    path_storage.push(jump_target);
-
-    // Indicate to the caller that path exploration states are pushed
-    should_pause_symex = true;
-    return;
-  }
-
   // Handle additional logic for merging and transitioning states
   goto_programt::const_targett new_state_pc, state_pc;
   symex_targett::sourcet original_source = state.source;
@@ -464,9 +440,32 @@ void goto_symext::symex_goto(statet &state)
     new_state.guard.add(boolean_negate(guard_expr));
   }
 
+  // Always perform path exploration
+
+  path_storaget::patht next_instruction(target, state);
+  next_instruction.state.saved_target = state_pc;
+  next_instruction.state.has_saved_next_instruction = true;
+
+  path_storaget::patht jump_target(target, state);
+  jump_target.state.saved_target = new_state_pc;
+  jump_target.state.has_saved_jump_target = true;
+
+  log.debug() << "Saving next instruction '"
+              << next_instruction.state.saved_target->source_location() << "'"
+              << log.eom;
+  log.debug() << "Saving jump target '"
+              << jump_target.state.saved_target->source_location() << "'"
+              << log.eom;
+  path_storage.push(next_instruction);
+  path_storage.push(jump_target);
+
+  // Indicate to the caller that path exploration states are pushed
+  should_pause_symex = true;
+
   print_trace();
   pointer = 0;
   traces.clear();
+  return;
 }
 
 
@@ -805,7 +804,7 @@ void goto_symext::symex_goto(statet &state)
   print_trace();
   pointer = 0;
   traces.clear();
-}+/
+}*/
 
 void goto_symext::symex_unreachable_goto(statet &state)
 {
