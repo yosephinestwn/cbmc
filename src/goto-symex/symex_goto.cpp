@@ -332,7 +332,7 @@ void goto_symext::symex_goto(statet &state)
 
   renamedt<exprt, L2> renamed_guard = state.rename(std::move(new_guard), ns);
   renamed_guard = try_evaluate_pointer_comparisons(
-    std::move(renamed_guar+d), state.value_set, language_mode, ns);
+    std::move(renamed_guard), state.value_set, language_mode, ns);
   if(symex_config.simplify_opt)
     renamed_guard.simplify(ns);
   new_guard = renamed_guard.get();
