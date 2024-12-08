@@ -243,8 +243,8 @@ void print_trace(){
   std::cout << "\n" << std::endl;
 }
 
-// symex_goto without new_guard
-void goto_symext::symex_goto(statet &state)
+// symex_goto without new_guard, without path recording
+/*void goto_symext::symex_goto(statet &state)
 {
   printf("Symex-Goto is called\n");
   PRECONDITION(state.reachable);
@@ -299,7 +299,7 @@ void goto_symext::symex_goto(statet &state)
   }
 
   // Handle forward paths: Choose the next instruction or saved paths
-  /*if (!path_storage.empty()) {
+  if (!path_storage.empty()) {
     auto next_path = path_storage.peek();
     path_storage.pop();
 
@@ -307,7 +307,7 @@ void goto_symext::symex_goto(statet &state)
     state = next_path.state;
     symex_transition(state, state.saved_target, next_path.state.has_saved_jump_target);
     return;
-  }*/
+  }
 
   // Default case: Proceed to the next instruction
   state.source.pc = state_pc;
@@ -318,7 +318,157 @@ void goto_symext::symex_goto(statet &state)
   traces.clear();
 
   return;
+}*/
+
+void goto_symext::symex_goto(statet &state)
+{
+  printf("Symex-Goto is called\n");
+
+  traces.push_back(pointer);
+  pointer++;
+
+  PRECONDITION(state.reachable);
+
+  const goto_programt::instructiont &instruction = *state.source.pc;
+
+  exprt new_guard = clean_expr(instruction.condition(), state, false);
+
+  renamedt<exprt, L2> renamed_guard = state.rename(std::move(new_guard), ns);
+  renamed_guard = try_evaluate_pointer_comparisons(
+    std::move(renamed_guard), state.value_set, language_mode, ns);
+  if (symex_config.simplify_opt)
+    renamed_guard.simplify(ns);
+  new_guard = renamed_guard.get();
+
+  if (new_guard.is_false())
+  {
+    target.location(state.guard.as_expr(), state.source);
+
+    // next instruction
+    symex_transition(state);
+
+    traces.push_back(pointer);
+    pointer++;
+
+    return; // nothing to do
+  }
+
+  target.goto_instruction(state.guard.as_expr(), renamed_guard, state.source);
+
+  DATA_INVARIANT(
+    !instruction.targets.empty(), "goto should have at least one target");
+
+  DATA_INVARIANT(
+    instruction.targets.size() == 1, "no support for non-deterministic gotos");
+
+  goto_programt::const_targett goto_target = instruction.get_target();
+
+  const bool backward = instruction.is_backwards_goto();
+
+  if (backward)
+  {
+    // Handle backward gotos, e.g., loops
+    const auto loop_id =
+      goto_programt::loop_id(state.source.function_id, *state.source.pc);
+
+    unsigned &unwind = state.call_stack().top().loop_iterations[loop_id].count;
+    unwind++;
+    std::cout << "Unwind " << unwind << std::endl;
+
+    if (should_stop_unwind(state.source, state.call_stack(), unwind))
+    {
+      loop_bound_exceeded(state, new_guard);
+      traces.push_back(pointer);
+      pointer++;
+
+      symex_transition(state);
+      return;
+    }
+
+    if (new_guard.is_true())
+    {
+      traces.push_back(pointer);
+      if (check_break(loop_id, unwind))
+      {
+        should_pause_symex = true;
+      }
+      symex_transition(state, goto_target, true);
+      return;
+    }
+  }
+
+  // Always perform path exploration
+  {
+    path_storaget::patht next_instruction(target, state);
+    next_instruction.state.saved_target = state_pc;
+    next_instruction.state.has_saved_next_instruction = true;
+
+    path_storaget::patht jump_target(target, state);
+    jump_target.state.saved_target = new_state_pc;
+    jump_target.state.has_saved_jump_target = true;
+
+    log.debug() << "Saving next instruction '"
+                << next_instruction.state.saved_target->source_location() << "'"
+                << log.eom;
+    log.debug() << "Saving jump target '"
+                << jump_target.state.saved_target->source_location() << "'"
+                << log.eom;
+    path_storage.push(next_instruction);
+    path_storage.push(jump_target);
+
+    // Indicate to the caller that path exploration states are pushed
+    should_pause_symex = true;
+    return;
+  }
+
+  // Handle additional logic for merging and transitioning states
+  goto_programt::const_targett new_state_pc, state_pc;
+  symex_targett::sourcet original_source = state.source;
+
+  if (!backward)
+  {
+    new_state_pc = goto_target;
+    state_pc = state.source.pc;
+    state_pc++;
+
+    while (state_pc != goto_target && !state_pc->is_target())
+      ++state_pc;
+
+    if (state_pc == goto_target)
+    {
+      traces.push_back(pointer);
+      pointer++;
+      symex_transition(state, goto_target, false);
+      return;
+    }
+  }
+  else
+  {
+    new_state_pc = state.source.pc;
+    new_state_pc++;
+    state_pc = goto_target;
+    traces.push_back(pointer);
+    pointer++;
+  }
+
+  // Handle conditional transitions
+  goto_statet &new_state = goto_state_list.back().second;
+  if (!backward)
+  {
+    new_state.guard.add(guard_expr);
+    state.guard.add(boolean_negate(guard_expr));
+  }
+  else
+  {
+    state.guard.add(guard_expr);
+    new_state.guard.add(boolean_negate(guard_expr));
+  }
+
+  print_trace();
+  pointer = 0;
+  traces.clear();
 }
+
 
 
 /*void goto_symext::symex_goto(statet &state)
@@ -336,7 +486,7 @@ void goto_symext::symex_goto(statet &state)
 
   renamedt<exprt, L2> renamed_guard = state.rename(std::move(new_guard), ns);
   renamed_guard = try_evaluate_pointer_comparisons(
-    std::move(renamed_guard), state.value_set, language_mode, ns);
+    std::move(renamed_guar+d), state.value_set, language_mode, ns);
   if(symex_config.simplify_opt)
     renamed_guard.simplify(ns);
   new_guard = renamed_guard.get();
@@ -655,7 +805,7 @@ void goto_symext::symex_goto(statet &state)
   print_trace();
   pointer = 0;
   traces.clear();
-}*/
+}+/
 
 void goto_symext::symex_unreachable_goto(statet &state)
 {
