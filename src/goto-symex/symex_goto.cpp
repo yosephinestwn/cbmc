@@ -457,8 +457,8 @@ void goto_symext::symex_goto(statet &state)
   while (!copied_path_storage.empty())
   {
     // Retrieve and remove the top element from the copied path storage
-    path_storaget::patht current_path = copied_path_storage.private_peek();
-    copied_path_storage.private_pop();
+    path_storaget::patht current_path = copied_path_storage.peek();
+    copied_path_storage.pop();
 
     // Print details about the current path
     std::cout << "Saved path: \n";
