@@ -506,7 +506,7 @@ void goto_symext::symex_goto(statet &state)
     log.debug() << "Resuming from next instruction '"
                 << state_pc->source_location() << "'" << log.eom;
   }
-  else
+  else if(symex_config.doing_path_exploration)
   {
     // We should save both the instruction after this goto, and the target of
     // the goto.
