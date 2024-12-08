@@ -506,7 +506,7 @@ void goto_symext::symex_goto(statet &state)
     log.debug() << "Resuming from next instruction '"
                 << state_pc->source_location() << "'" << log.eom;
   }
-  else if(symex_config.doing_path_exploration)
+  else
   {
     // We should save both the instruction after this goto, and the target of
     // the goto.
@@ -535,6 +535,14 @@ void goto_symext::symex_goto(statet &state)
     // executing. Signal to the caller that states have been pushed (therefore
     // symex has not yet completed and must be resumed), and bail out.
     should_pause_symex = true;
+
+    //Print next instruction and target locations
+
+    std::cout << "  Saved Next Instruction at: "
+              << next_instruction.state.saved_target->source_location() << "\n";
+
+    std::cout << "  Saved Jump Target at: "
+              << jump_target.state.saved_target->source_location() << "\n";
     return;
   }
 
