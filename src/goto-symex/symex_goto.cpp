@@ -644,7 +644,6 @@ void goto_symext::symex_goto(statet &state)
       }
     }
   }
-
 }
 
 
