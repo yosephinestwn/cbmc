@@ -324,32 +324,25 @@ void goto_symext::symex_goto(statet &state)
 {
   printf("Symex-Goto is called\n");
 
-  traces.push_back(pointer);
-  pointer++;
-
   PRECONDITION(state.reachable);
 
-  const goto_programt::instructiont &instruction = *state.source.pc;
+  const goto_programt::instructiont &instruction=*state.source.pc;
 
   exprt new_guard = clean_expr(instruction.condition(), state, false);
 
   renamedt<exprt, L2> renamed_guard = state.rename(std::move(new_guard), ns);
   renamed_guard = try_evaluate_pointer_comparisons(
-    std::move(renamed_guard), state.value_set, language_mode, ns);
-  if (symex_config.simplify_opt)
+    std::move(renamed_guar+d), state.value_set, language_mode, ns);
+  if(symex_config.simplify_opt)
     renamed_guard.simplify(ns);
   new_guard = renamed_guard.get();
 
-  if (new_guard.is_false())
+  if(new_guard.is_false())
   {
     target.location(state.guard.as_expr(), state.source);
 
     // next instruction
     symex_transition(state);
-
-    traces.push_back(pointer);
-    pointer++;
-
     return; // nothing to do
   }
 
@@ -358,16 +351,49 @@ void goto_symext::symex_goto(statet &state)
   DATA_INVARIANT(
     !instruction.targets.empty(), "goto should have at least one target");
 
+  // we only do deterministic gotos for now
   DATA_INVARIANT(
     instruction.targets.size() == 1, "no support for non-deterministic gotos");
 
-  goto_programt::const_targett goto_target = instruction.get_target();
+  goto_programt::const_targett goto_target=
+    instruction.get_target();
 
   const bool backward = instruction.is_backwards_goto();
 
-  if (backward)
+
+  if(backward)
   {
-    // Handle backward gotos, e.g., loops
+    // is it label: goto label; or while(cond); - popular in SV-COMP
+    if(
+      symex_config.self_loops_to_assumptions &&
+      // label: goto label; or do {} while(cond);
+      (goto_target == state.source.pc ||
+       // while(cond);
+       (instruction.incoming_edges.size() == 1 &&
+        *instruction.incoming_edges.begin() == goto_target &&
+        goto_target->is_goto() && new_guard.is_true())))
+    {
+      // generate assume(false) or a suitable negation if this
+      // instruction is a conditional goto
+      exprt negated_guard = boolean_negate(new_guard);
+      do_simplify(negated_guard);
+      log.statistics() << "replacing self-loop at "
+                       << state.source.pc->source_location() << " by assume("
+                       << from_expr(ns, state.source.function_id, negated_guard)
+                       << ")" << messaget::eom;
+      if(symex_config.unwinding_assertions)
+      {
+        log.warning()
+          << "no unwinding assertion will be generated for self-loop at "
+          << state.source.pc->source_location() << messaget::eom;
+      }
+      symex_assume_l2(state, negated_guard);
+
+      // next instruction
+      symex_transition(state);
+      return;
+    }
+
     const auto loop_id =
       goto_programt::loop_id(state.source.function_id, *state.source.pc);
 
@@ -375,60 +401,115 @@ void goto_symext::symex_goto(statet &state)
     unwind++;
     std::cout << "Unwind " << unwind << std::endl;
 
-    if (should_stop_unwind(state.source, state.call_stack(), unwind))
+    if(should_stop_unwind(state.source, state.call_stack(), unwind))
     {
+      // we break the loop
       loop_bound_exceeded(state, new_guard);
       traces.push_back(pointer);
       pointer++;
 
+      // next instruction
       symex_transition(state);
       return;
     }
 
-    if (new_guard.is_true())
+    if(new_guard.is_true())
     {
       traces.push_back(pointer);
-      if (check_break(loop_id, unwind))
+      // we continue executing the loop
+      if(check_break(loop_id, unwind))
       {
         should_pause_symex = true;
       }
       symex_transition(state, goto_target, true);
-      return;
+      return; // nothing else to do
     }
   }
 
-  // Handle additional logic for merging and transitioning states
-  goto_programt::const_targett new_state_pc, state_pc;
-  symex_targett::sourcet original_source = state.source;
-
-  if (!backward)
+  // No point executing both branches of an unconditional goto.
+  if(
+    new_guard.is_true() && // We have an unconditional goto, AND
+    // either there are no reachable blocks between us and the target in the
+    // surrounding scope (because state.guard == true implies there is no path
+    // around this GOTO instruction)
+    (state.guard.is_true() ||
+     // or there is another block, but we're doing path exploration so
+     // we're going to skip over it for now and return to it later.
+     symex_config.doing_path_exploration))
   {
-    new_state_pc = goto_target;
-    state_pc = state.source.pc;
+    DATA_INVARIANT(
+      instruction.targets.size() > 0,
+      "Instruction is an unconditional goto with no target: " +
+        instruction.code().pretty());
+    symex_transition(state, instruction.get_target(), true);
+    return;
+  }
+
+  goto_programt::const_targett new_state_pc, state_pc;
+  symex_targett::sourcet original_source=state.source;
+
+  if(!backward)
+  {
+    new_state_pc=goto_target;
+    state_pc=state.source.pc;
     state_pc++;
 
-    while (state_pc != goto_target && !state_pc->is_target())
-      ++state_pc;
+    // skip dead instructions
+    if(new_guard.is_true())
+      while(state_pc!=goto_target && !state_pc->is_target())
+        ++state_pc;
 
-    if (state_pc == goto_target)
+    if(state_pc==goto_target)
     {
       traces.push_back(pointer);
       pointer++;
       symex_transition(state, goto_target, false);
-      return;
+      return; // nothing else to do
     }
   }
   else
   {
-    new_state_pc = state.source.pc;
+    new_state_pc=state.source.pc;
     new_state_pc++;
-    state_pc = goto_target;
+    state_pc=goto_target;
     traces.push_back(pointer);
     pointer++;
   }
 
-  // Always perform path exploration
+  // Normally the next instruction to execute would be state_pc and we save
+  // new_state_pc for later. But if we're executing from a saved state, then
+  // new_state_pc should be the state that we saved from earlier, so let's
+  // execute that instead.
+  if(state.has_saved_jump_target)
+  {
+    INVARIANT(
+      new_state_pc == state.saved_target,
+      "Tried to explore the other path of a branch, but the next "
+      "instruction along that path is not the same as the instruction "
+      "that we saved at the branch point. Saved instruction is " +
+        state.saved_target->code().pretty() +
+        "\nwe were intending "
+        "to explore " +
+        new_state_pc->code().pretty() +
+        "\nthe "
+        "instruction we think we saw on a previous path exploration is " +
+        state_pc->code().pretty());
+    goto_programt::const_targett tmp = new_state_pc;
+    new_state_pc = state_pc;
+    state_pc = tmp;
 
+    log.debug() << "Resuming from jump target '" << state_pc->source_location()
+                << "'" << log.eom;
+  }
+  else if(state.has_saved_next_instruction)
+  {
+    log.debug() << "Resuming from next instruction '"
+                << state_pc->source_location() << "'" << log.eom;
+  }
+
+  // We should save both the instruction after this goto, and the target of
+  // the goto.
+  //Always do path exploration
   path_storaget::patht next_instruction(target, state);
   next_instruction.state.saved_target = state_pc;
   next_instruction.state.has_saved_next_instruction = true;
@@ -436,6 +517,9 @@ void goto_symext::symex_goto(statet &state)
   path_storaget::patht jump_target(target, state);
   jump_target.state.saved_target = new_state_pc;
   jump_target.state.has_saved_jump_target = true;
+  // `forward` tells us where the branch we're _currently_ executing is
+  // pointing to; this needs to be inverted for the branch that we're saving,
+  // so let its truth value for `backwards` be the same as ours for `forward`.
 
   log.debug() << "Saving next instruction '"
               << next_instruction.state.saved_target->source_location() << "'"
@@ -446,15 +530,19 @@ void goto_symext::symex_goto(statet &state)
   path_storage.push(next_instruction);
   path_storage.push(jump_target);
 
+  // It is now up to the caller of symex to decide which path to continue
+  // executing. Signal to the caller that states have been pushed (therefore
+  // symex has not yet completed and must be resumed), and bail out.
+  should_pause_symex = true;
+
   std::cout << "  Saved Next Instruction at: "
             << next_instruction.state.saved_target->source_location() << "\n";
 
   std::cout << "  Saved Jump Target at: "
             << jump_target.state.saved_target->source_location() << "\n";
 
-  // Indicate to the caller that path exploration states are pushed
-  should_pause_symex = true;
-
+  // put a copy of the current state into the state-queue, to be used by
+  // merge_gotos when we visit new_state_pc
   framet::goto_state_listt &goto_state_list =
     state.call_stack().top().goto_state_map[new_state_pc];
 
@@ -541,10 +629,6 @@ void goto_symext::symex_goto(statet &state)
       }
     }
   }
-
-  print_trace();
-  pointer = 0;
-  traces.clear();
 }
 
 
