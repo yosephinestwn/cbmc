@@ -449,6 +449,39 @@ void goto_symext::symex_goto(statet &state)
   // Indicate to the caller that path exploration states are pushed
   should_pause_symex = true;
 
+
+  // Create a copy of the path storage
+  auto copied_path_storage = path_storage;
+
+  // Iterate through the copied path storage and print its contents
+  while (!copied_path_storage.empty())
+  {
+    // Retrieve and remove the top element from the copied path storage
+    path_storaget::patht current_path = copied_path_storage.top();
+    copied_path_storage.pop();
+
+    // Print details about the current path
+    std::cout << "Saved path: \n";
+    std::cout << "  Target Location: "
+              << current_path.state.saved_target->source_location() << "\n";
+
+    // Check if the path has a saved next instruction
+    if (current_path.state.has_saved_next_instruction)
+    {
+      std::cout << "  Saved Next Instruction at: "
+                << current_path.state.saved_target->source_location()
+                << "\n";
+    }
+
+    // Check if the path has a saved jump target
+    if (current_path.state.has_saved_jump_target)
+    {
+      std::cout << "  Saved Jump Target at: "
+                << current_path.state.saved_target->source_location()
+                << "\n";
+    }
+  }
+
   framet::goto_state_listt &goto_state_list =
     state.call_stack().top().goto_state_map[new_state_pc];
 
@@ -471,23 +504,6 @@ void goto_symext::symex_goto(statet &state)
     goto_state_list.emplace_back(state.source, state);
 
     symex_transition(state, state_pc, backward);
-
-    if(!symex_config.doing_path_exploration)
-    {
-      // This doesn't work for --paths (single-path mode) yet, as in multi-path
-      // mode we remove the implied constants at a control-flow merge, but in
-      // single-path mode we don't run merge_gotos.
-      auto &taken_state = backward ? state : goto_state_list.back().second;
-      auto &not_taken_state = backward ? goto_state_list.back().second : state;
-
-      apply_goto_condition(
-        state,
-        taken_state,
-        not_taken_state,
-        instruction.condition(),
-        new_guard,
-        ns);
-    }
 
     // produce new guard symbol
     exprt guard_expr;
