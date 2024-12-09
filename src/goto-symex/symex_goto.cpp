@@ -32,7 +32,6 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <unordered_map>
 
 std::list<source_locationt> traces;
-int pointer = 0;
 
 void goto_symext::apply_goto_condition(
   goto_symex_statet &current_state,
@@ -235,7 +234,7 @@ renamedt<exprt, L2> try_evaluate_pointer_comparisons(
 }
 
 void print_trace(){
-  std::cout << "  Traces: ";
+  std::cout << "  Traces: \n";
 
   for(auto i : traces){
     std::cout << "  " << i << "\n";
