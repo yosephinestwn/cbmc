@@ -29,6 +29,7 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <iostream>
 #include <cstdio>
 #include <list>
+#include <unordered_map>
 
 std::list<int> traces;
 int pointer = 0;
@@ -405,8 +406,7 @@ void goto_symext::symex_goto(statet &state)
     {
       // we break the loop
       loop_bound_exceeded(state, new_guard);
-      traces.push_back(pointer);
-      pointer++;
+
 
       // next instruction
       symex_transition(state);
@@ -415,7 +415,7 @@ void goto_symext::symex_goto(statet &state)
 
     if(new_guard.is_true())
     {
-      traces.push_back(pointer);
+
       // we continue executing the loop
       if(check_break(loop_id, unwind))
       {
@@ -435,7 +435,7 @@ void goto_symext::symex_goto(statet &state)
     (state.guard.is_true() ||
      // or there is another block, but we're doing path exploration so
      // we're going to skip over it for now and return to it later.
-     true))
+     symex_config.doing_path_exploration))
   {
     DATA_INVARIANT(
       instruction.targets.size() > 0,
@@ -461,8 +461,7 @@ void goto_symext::symex_goto(statet &state)
 
     if(state_pc==goto_target)
     {
-      traces.push_back(pointer);
-      pointer++;
+      traces.push_back(state_pc->location_number);
       symex_transition(state, goto_target, false);
       return; // nothing else to do
     }
@@ -472,8 +471,7 @@ void goto_symext::symex_goto(statet &state)
     new_state_pc=state.source.pc;
     new_state_pc++;
     state_pc=goto_target;
-    traces.push_back(pointer);
-    pointer++;
+    traces.push_back(state_pc->location_number);
   }
 
   // Normally the next instruction to execute would be state_pc and we save
@@ -506,7 +504,7 @@ void goto_symext::symex_goto(statet &state)
     log.debug() << "Resuming from next instruction '"
                 << state_pc->source_location() << "'" << log.eom;
   }
-  else if(true)
+  else if(symex_config.doing_path_exploration)
   {
     // We should save both the instruction after this goto, and the target of
     // the goto.
@@ -572,7 +570,7 @@ void goto_symext::symex_goto(statet &state)
     symex_transition(state, state_pc, backward);
 
     //Not needed since path exploration is always enabled
-    if(!true)
+    if(!symex_config.doing_path_exploration)
     {
       // This doesn't work for --paths (single-path mode) yet, as in multi-path
       // mode we remove the implied constants at a control-flow merge, but in
@@ -652,6 +650,8 @@ void goto_symext::symex_goto(statet &state)
       }
     }
   }
+  print_trace();
+  traces.clear();
 }
 
 
