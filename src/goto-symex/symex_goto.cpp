@@ -422,6 +422,7 @@ void goto_symext::symex_goto(statet &state)
       }
       traces.push_back(goto_target->location_number);
       symex_transition(state, goto_target, true);
+      traces.push_back(goto_target->location_number);
       return; // nothing else to do
     }
   }
