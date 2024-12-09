@@ -361,7 +361,6 @@ void goto_symext::symex_goto(statet &state)
 
   const bool backward = instruction.is_backwards_goto();
 
-
   if(backward)
   {
     // is it label: goto label; or while(cond); - popular in SV-COMP
@@ -388,6 +387,7 @@ void goto_symext::symex_goto(statet &state)
           << "no unwinding assertion will be generated for self-loop at "
           << state.source.pc->source_location() << messaget::eom;
       }
+      traces.push_back(goto_target->location_number);
       symex_assume_l2(state, negated_guard);
 
       // next instruction
@@ -406,8 +406,7 @@ void goto_symext::symex_goto(statet &state)
     {
       // we break the loop
       loop_bound_exceeded(state, new_guard);
-
-
+      traces.push_back(goto_target->location_number);
       // next instruction
       symex_transition(state);
       return;
@@ -421,6 +420,7 @@ void goto_symext::symex_goto(statet &state)
       {
         should_pause_symex = true;
       }
+      traces.push_back(goto_target->location_number);
       symex_transition(state, goto_target, true);
       return; // nothing else to do
     }
