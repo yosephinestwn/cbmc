@@ -31,7 +31,7 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <list>
 #include <unordered_map>
 
-std::list<int> traces;
+std::list<source_locationt> traces;
 int pointer = 0;
 
 void goto_symext::apply_goto_condition(
@@ -235,10 +235,10 @@ renamedt<exprt, L2> try_evaluate_pointer_comparisons(
 }
 
 void print_trace(){
-  std::cout << "Traces: ";
+  std::cout << "  Traces: ";
 
   for(int i : traces){
-    std::cout << i << " ";
+    std::cout << "  " << i << " ";
   }
 
   std::cout << "\n" << std::endl;
@@ -344,6 +344,7 @@ void goto_symext::symex_goto(statet &state)
 
     // next instruction
     symex_transition(state);
+    traces.push_back(state.source.pc->source_location());
     return; // nothing to do
   }
 
@@ -387,7 +388,7 @@ void goto_symext::symex_goto(statet &state)
           << "no unwinding assertion will be generated for self-loop at "
           << state.source.pc->source_location() << messaget::eom;
       }
-      traces.push_back(state.source.pc->location_number);
+      traces.push_back(state.source.pc->source_location());
       symex_assume_l2(state, negated_guard);
 
       // next instruction
@@ -408,7 +409,7 @@ void goto_symext::symex_goto(statet &state)
       loop_bound_exceeded(state, new_guard);
       // next instruction
       symex_transition(state);
-      traces.push_back(state.source.pc->location_number);
+      traces.push_back(state.source.pc->source_location());
       return;
     }
 
@@ -421,7 +422,7 @@ void goto_symext::symex_goto(statet &state)
         should_pause_symex = true;
       }
       symex_transition(state, goto_target, true);
-      traces.push_back(state.source.pc->location_number);
+      traces.push_back(state.source.pc->source_location());
       return; // nothing else to do
     }
   }
@@ -461,8 +462,8 @@ void goto_symext::symex_goto(statet &state)
 
     if(state_pc==goto_target)
     {
-      traces.push_back(state_pc->location_number);
       symex_transition(state, goto_target, false);
+      traces.push_back(state.source.pc->source_location());
       return; // nothing else to do
     }
   }
@@ -471,7 +472,7 @@ void goto_symext::symex_goto(statet &state)
     new_state_pc=state.source.pc;
     new_state_pc++;
     state_pc=goto_target;
-    traces.push_back(state_pc->location_number);
+    traces.push_back(state.source.pc->source_location());
   }
 
   // Normally the next instruction to execute would be state_pc and we save
@@ -657,11 +658,6 @@ void goto_symext::symex_goto(statet &state)
 
 /*void goto_symext::symex_goto(statet &state)
 {
-  printf("Symex-Goto is called\n");
-
-  traces.push_back(pointer);
-  pointer++;
-
   PRECONDITION(state.reachable);
 
   const goto_programt::instructiont &instruction=*state.source.pc;
@@ -681,10 +677,6 @@ void goto_symext::symex_goto(statet &state)
 
     // next instruction
     symex_transition(state);
-
-    traces.push_back(pointer);
-    pointer++;
-
     return; // nothing to do
   }
 
@@ -747,8 +739,6 @@ void goto_symext::symex_goto(statet &state)
     {
       // we break the loop
       loop_bound_exceeded(state, new_guard);
-      traces.push_back(pointer);
-      pointer++;
 
       // next instruction
       symex_transition(state);
@@ -757,7 +747,6 @@ void goto_symext::symex_goto(statet &state)
 
     if(new_guard.is_true())
     {
-      traces.push_back(pointer);
       // we continue executing the loop
       if(check_break(loop_id, unwind))
       {
@@ -803,8 +792,6 @@ void goto_symext::symex_goto(statet &state)
 
     if(state_pc==goto_target)
     {
-      traces.push_back(pointer);
-      pointer++;
       symex_transition(state, goto_target, false);
       return; // nothing else to do
     }
@@ -814,8 +801,6 @@ void goto_symext::symex_goto(statet &state)
     new_state_pc=state.source.pc;
     new_state_pc++;
     state_pc=goto_target;
-    traces.push_back(pointer);
-    pointer++;
   }
 
   // Normally the next instruction to execute would be state_pc and we save
@@ -985,10 +970,6 @@ void goto_symext::symex_goto(statet &state)
       }
     }
   }
-
-  print_trace();
-  pointer = 0;
-  traces.clear();
 }*/
 
 void goto_symext::symex_unreachable_goto(statet &state)
