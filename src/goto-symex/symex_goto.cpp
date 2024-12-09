@@ -237,7 +237,7 @@ renamedt<exprt, L2> try_evaluate_pointer_comparisons(
 void print_trace(){
   std::cout << "  Traces: ";
 
-  for(int i : traces){
+  for(auto i : traces){
     std::cout << "  " << i << " ";
   }
 
