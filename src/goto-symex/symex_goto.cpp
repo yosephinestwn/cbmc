@@ -238,7 +238,7 @@ void print_trace(){
   std::cout << "  Traces: ";
 
   for(auto i : traces){
-    std::cout << "  " << i << " ";
+    std::cout << "  " << i << "\n";
   }
 
   std::cout << "\n" << std::endl;
@@ -652,6 +652,7 @@ void goto_symext::symex_goto(statet &state)
     }
   }
   print_trace();
+  traces.clear();
 }
 
 
