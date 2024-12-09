@@ -387,7 +387,7 @@ void goto_symext::symex_goto(statet &state)
           << "no unwinding assertion will be generated for self-loop at "
           << state.source.pc->source_location() << messaget::eom;
       }
-      traces.push_back(goto_target->location_number);
+      traces.push_back(state.source.pc->location_number);
       symex_assume_l2(state, negated_guard);
 
       // next instruction
@@ -406,9 +406,9 @@ void goto_symext::symex_goto(statet &state)
     {
       // we break the loop
       loop_bound_exceeded(state, new_guard);
-      traces.push_back(goto_target->location_number);
       // next instruction
       symex_transition(state);
+      traces.push_back(state.source.pc->location_number);
       return;
     }
 
@@ -421,7 +421,7 @@ void goto_symext::symex_goto(statet &state)
         should_pause_symex = true;
       }
       symex_transition(state, goto_target, true);
-      traces.push_back(goto_target->location_number);
+      traces.push_back(state.source.pc->location_number);
       return; // nothing else to do
     }
   }
