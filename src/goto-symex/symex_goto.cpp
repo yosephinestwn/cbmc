@@ -31,7 +31,8 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <list>
 #include <unordered_map>
 
-std::list<goto_programt::const_targett> traces;
+std::vector<goto_programt::const_targett> traces;
+std::list<source_locationt> trace;
 int pointer = 0;
 int trace_idx = 0;
 
@@ -238,7 +239,7 @@ renamedt<exprt, L2> try_evaluate_pointer_comparisons(
 void print_trace(){
   std::cout << "  Traces: \n";
 
-  for(auto i : traces){
+  for(auto i : trace){
     std::cout << "  " << i << "\n";
   }
 
@@ -324,6 +325,7 @@ void print_trace(){
 void goto_symext::symex_goto(statet &state)
 {
   PRECONDITION(state.reachable);
+  trace.push_back(state.source.pc->source_location());
 
   const goto_programt::instructiont &instruction = *state.source.pc;
 
@@ -381,6 +383,7 @@ void goto_symext::symex_goto(statet &state)
     {
       // Continue executing the loop
       symex_transition(state, goto_target, true);
+      print_trace();
       return; // Nothing else to do
     }
   }
@@ -388,18 +391,19 @@ void goto_symext::symex_goto(statet &state)
   // Handle path exploration using trace[]
   if (symex_config.doing_path_exploration)
   {
-    traces.push_back(state.source.pc);    // Next instruction
-    traces.push_back(goto_target);        // Goto target
+    if (traces.size() <= trace_idx)
+    {
+      // Record both paths if not already saved
+      traces.push_back(state.source.pc);    // Next instruction
+      traces.push_back(goto_target);        // Goto target
+    }
 
     // Select path to follow based on trace index
-    goto_programt::const_targett next_path = traces.front();
-    traces.pop_front();
+    goto_programt::const_targett next_path = traces[trace_idx];
+    trace_idx++; // Increment trace index for the next step
 
-    log.debug() << "Following path : '"
+    log.debug() << "Following path at index " << trace_idx - 1 << ": '"
                 << next_path->source_location() << "'" << log.eom;
-
-    std::cout << "Following path : '"
-              << next_path->source_location() << "'\n";
 
     // Transition to the selected path
     symex_transition(state, next_path, backward);
