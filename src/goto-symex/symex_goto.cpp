@@ -340,6 +340,7 @@ void goto_symext::symex_goto(statet &state)
 
   if (new_guard.is_false())
   {
+    std::cout << "Guard: " << new_guard.is_true() << "\n";
     target.location(state.guard.as_expr(), state.source);
 
     // Next instruction
