@@ -34,7 +34,7 @@ Author: Daniel Kroening, kroening@kroening.com
 std::vector<goto_programt::const_targett> traces;
 std::list<source_locationt> trace;
 int pointer = 0;
-int trace_idx = 0;
+std::size_t trace_idx = 0;
 
 void goto_symext::apply_goto_condition(
   goto_symex_statet &current_state,
