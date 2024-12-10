@@ -394,7 +394,7 @@ void goto_symext::symex_goto(statet &state)
   // Handle path exploration using trace[]
   if (symex_config.doing_path_exploration)
   {
-    printf("Doing Path exploration \n")
+    printf("Doing Path exploration \n");
     if (traces.size() <= trace_idx)
     {
       // Record both paths if not already saved
