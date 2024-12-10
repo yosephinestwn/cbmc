@@ -327,6 +327,8 @@ void goto_symext::symex_goto(statet &state)
 
   PRECONDITION(state.reachable);
 
+  traces.push_back(state.source.pc->source_location());
+
   const goto_programt::instructiont &instruction=*state.source.pc;
 
   exprt new_guard = clean_expr(instruction.condition(), state, false);
