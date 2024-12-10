@@ -406,6 +406,7 @@ void goto_symext::symex_goto(statet &state)
                 << next_path->source_location() << "'" << log.eom;
 
     // Transition to the selected path
+    std::cout << "Next Path: " << next_path->source_location() << "\n";
     symex_transition(state, next_path, backward);
 
     should_pause_symex = true; // Indicate that execution should pause
