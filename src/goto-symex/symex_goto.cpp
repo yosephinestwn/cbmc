@@ -413,8 +413,10 @@ void goto_symext::symex_goto(statet &state)
     return;
   }
 
+  goto_programt::const_targett state_pc = state.source.pc;
+  state_pc++;
   // Unconditionally follow the next instruction if not exploring paths
-  symex_transition(state, state.source.pc + 1, backward);
+  symex_transition(state, state_pc, backward);
   print_trace();
 }
 
