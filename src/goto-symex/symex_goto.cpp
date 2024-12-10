@@ -348,6 +348,7 @@ void goto_symext::symex_goto(statet &state)
     symex_transition(state);
     traces.push_back(state.source.pc->source_location());
     printf("\nGuard is false\n");
+    print_trace();
     return; // nothing to do
   }
 
@@ -401,6 +402,7 @@ void goto_symext::symex_goto(statet &state)
 
       // next instruction
       symex_transition(state);
+      print_trace();
       return;
     }
 
@@ -418,6 +420,7 @@ void goto_symext::symex_goto(statet &state)
       // next instruction
       symex_transition(state);
       traces.push_back(state.source.pc->source_location());
+      print_trace();
       return;
     }
 
@@ -431,6 +434,7 @@ void goto_symext::symex_goto(statet &state)
       }
       symex_transition(state, goto_target, true);
       traces.push_back(state.source.pc->source_location());
+      print_trace();
       return; // nothing else to do
     }
   }
@@ -452,6 +456,7 @@ void goto_symext::symex_goto(statet &state)
         instruction.code().pretty());
     symex_transition(state, instruction.get_target(), true);
     printf("\nIs unconditional goto\n");
+    print_trace();
     return;
   }
 
@@ -476,6 +481,7 @@ void goto_symext::symex_goto(statet &state)
       symex_transition(state, goto_target, false);
       traces.push_back(state.source.pc->source_location());
       printf("\nstate_pc==goto_target\n");
+      print_trace();
       return; // nothing else to do
     }
   }
@@ -560,6 +566,7 @@ void goto_symext::symex_goto(statet &state)
               << jump_target.state.saved_target->source_location() << "\n";
     std::cout << "  How many times this part got executed (a path is saved): " << pointer << "\n";
     pointer++;
+    print_trace();
     return;
   }
 
