@@ -340,7 +340,7 @@ void goto_symext::symex_goto(statet &state)
     renamed_guard.simplify(ns);
   new_guard = renamed_guard.get();
 
-  if(new_guard.is_false())
+  if(new_guard.is_false()) //Move to other instruction
   {
     target.location(state.guard.as_expr(), state.source);
 
@@ -384,6 +384,10 @@ void goto_symext::symex_goto(statet &state)
                        << state.source.pc->source_location() << " by assume("
                        << from_expr(ns, state.source.function_id, negated_guard)
                        << ")" << messaget::eom;
+      std::cout << "replacing self-loop at "
+                       << state.source.pc->source_location() << " by assume("
+                       << from_expr(ns, state.source.function_id, negated_guard)
+                       << ")\n";
       if(symex_config.unwinding_assertions)
       {
         log.warning()
