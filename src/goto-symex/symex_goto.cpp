@@ -31,7 +31,7 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <list>
 #include <unordered_map>
 
-std::list<source_locationt> traces;
+std::list<goto_programt::const_targett> traces;
 int pointer = 0;
 int trace_idx = 0;
 
