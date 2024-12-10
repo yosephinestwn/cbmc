@@ -464,6 +464,8 @@ void goto_symext::symex_goto(statet &state)
     state_pc=state.source.pc;
     state_pc++;
 
+    printf("\nnew_state_pc=goto_target\n");
+
     // skip dead instructions
     if(new_guard.is_true())
       while(state_pc!=goto_target && !state_pc->is_target())
@@ -483,6 +485,8 @@ void goto_symext::symex_goto(statet &state)
     new_state_pc++;
     state_pc=goto_target;
     traces.push_back(state.source.pc->source_location());
+
+    printf("\nnew_state_pc=state.source.pc\n");
   }
 
   // Normally the next instruction to execute would be state_pc and we save
