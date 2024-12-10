@@ -32,6 +32,7 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <unordered_map>
 
 std::list<source_locationt> traces;
+int pointer = 0;
 
 void goto_symext::apply_goto_condition(
   goto_symex_statet &current_state,
@@ -541,6 +542,8 @@ void goto_symext::symex_goto(statet &state)
 
     std::cout << "  Saved Jump Target at: "
               << jump_target.state.saved_target->source_location() << "\n";
+    std::cout << "  How many times this part got executed (a path is saved): " << pointer << "\n";
+    pointer++;
     return;
   }
 
