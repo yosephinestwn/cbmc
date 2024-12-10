@@ -347,7 +347,7 @@ void goto_symext::symex_goto(statet &state)
     // next instruction
     symex_transition(state);
     traces.push_back(state.source.pc->source_location());
-    printf("Is this the first time this function is called?\n");
+    printf("\nGuard is false\n");
     return; // nothing to do
   }
 
@@ -367,6 +367,7 @@ void goto_symext::symex_goto(statet &state)
 
   if(backward)
   {
+    printf("\nIs backward\n");
     // is it label: goto label; or while(cond); - popular in SV-COMP
     if(
       symex_config.self_loops_to_assumptions &&
@@ -450,6 +451,7 @@ void goto_symext::symex_goto(statet &state)
       "Instruction is an unconditional goto with no target: " +
         instruction.code().pretty());
     symex_transition(state, instruction.get_target(), true);
+    printf("\nIs unconditional goto\n");
     return;
   }
 
@@ -471,6 +473,7 @@ void goto_symext::symex_goto(statet &state)
     {
       symex_transition(state, goto_target, false);
       traces.push_back(state.source.pc->source_location());
+      printf("\nstate_pc==goto_target\n");
       return; // nothing else to do
     }
   }
