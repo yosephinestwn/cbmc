@@ -388,13 +388,17 @@ void goto_symext::symex_goto(statet &state)
     }
   }
 
+  goto_programt::const_targett state_pc = state.source.pc;
+  state_pc++;
+
   // Handle path exploration using trace[]
   if (symex_config.doing_path_exploration)
   {
+    printf("Doing Path exploration \n")
     if (traces.size() <= trace_idx)
     {
       // Record both paths if not already saved
-      traces.push_back(state.source.pc);    // Next instruction
+      traces.push_back(state_pc);    // Next instruction
       traces.push_back(goto_target);        // Goto target
     }
 
@@ -414,8 +418,7 @@ void goto_symext::symex_goto(statet &state)
     return;
   }
 
-  goto_programt::const_targett state_pc = state.source.pc;
-  state_pc++;
+
   // Unconditionally follow the next instruction if not exploring paths
   symex_transition(state, state_pc, backward);
   print_trace();
