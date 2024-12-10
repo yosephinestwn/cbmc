@@ -464,7 +464,7 @@ void goto_symext::symex_goto(statet &state)
     state_pc=state.source.pc;
     state_pc++;
 
-    printf("\nnew_state_pc=goto_target\n");
+    printf("\nnew_state_pc=goto_target - not backward\n");
 
     // skip dead instructions
     if(new_guard.is_true())
@@ -486,7 +486,7 @@ void goto_symext::symex_goto(statet &state)
     state_pc=goto_target;
     traces.push_back(state.source.pc->source_location());
 
-    printf("\nnew_state_pc=state.source.pc\n");
+    printf("\nnew_state_pc=state.source.pc - backward\n");
   }
 
   // Normally the next instruction to execute would be state_pc and we save
@@ -513,11 +513,13 @@ void goto_symext::symex_goto(statet &state)
 
     log.debug() << "Resuming from jump target '" << state_pc->source_location()
                 << "'" << log.eom;
+    printf("\njump target is saved\n");
   }
   else if(state.has_saved_next_instruction)
   {
     log.debug() << "Resuming from next instruction '"
                 << state_pc->source_location() << "'" << log.eom;
+    printf("\nnext instruction is saved\n");
   }
   else if(symex_config.doing_path_exploration)
   {
