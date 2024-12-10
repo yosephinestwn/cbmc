@@ -388,7 +388,6 @@ void goto_symext::symex_goto(statet &state)
     }
   }
 
-  goto_programt::const_targett next_path;
   // Handle path exploration using trace[]
   if (symex_config.doing_path_exploration)
   {
@@ -400,7 +399,7 @@ void goto_symext::symex_goto(statet &state)
     }
 
     // Select path to follow based on trace index
-    next_path = traces[trace_idx];
+    goto_programt::const_targett next_path = traces[trace_idx];
     trace_idx++; // Increment trace index for the next step
 
     log.debug() << "Following path at index " << trace_idx - 1 << ": '"
@@ -415,7 +414,7 @@ void goto_symext::symex_goto(statet &state)
   }
 
   // Unconditionally follow the next instruction if not exploring paths
-  symex_transition(state, next_path, backward);
+  symex_transition(state, state.source.pc + 1, backward);
   print_trace();
 }
 
