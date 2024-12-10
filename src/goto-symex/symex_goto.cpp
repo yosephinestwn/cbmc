@@ -324,6 +324,7 @@ void print_trace(){
 }*/
 void goto_symext::symex_goto(statet &state)
 {
+  printf("Symex-goto is called\n");
   PRECONDITION(state.reachable);
   trace.push_back(state.source.pc->source_location());
 
