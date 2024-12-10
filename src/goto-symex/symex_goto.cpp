@@ -347,6 +347,7 @@ void goto_symext::symex_goto(statet &state)
     // next instruction
     symex_transition(state);
     traces.push_back(state.source.pc->source_location());
+    printf("Is this the first time this function is called?\n");
     return; // nothing to do
   }
 
@@ -578,7 +579,6 @@ void goto_symext::symex_goto(statet &state)
 
     symex_transition(state, state_pc, backward);
 
-    //Not needed since path exploration is always enabled
     if(!symex_config.doing_path_exploration)
     {
       // This doesn't work for --paths (single-path mode) yet, as in multi-path
