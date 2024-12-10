@@ -416,6 +416,7 @@ void goto_symext::symex_goto(statet &state)
 
   // Unconditionally follow the next instruction if not exploring paths
   symex_transition(state, next_path, backward);
+  print_trace();
 }
 
 /*void goto_symext::symex_goto(statet &state)
