@@ -31,10 +31,8 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <list>
 #include <unordered_map>
 
-std::vector<goto_programt::const_targett> traces;
-std::list<source_locationt> trace;
+std::list<source_locationt> traces;
 int pointer = 0;
-std::size_t trace_idx = 0;
 
 void goto_symext::apply_goto_condition(
   goto_symex_statet &current_state,
@@ -239,7 +237,7 @@ renamedt<exprt, L2> try_evaluate_pointer_comparisons(
 void print_trace(){
   std::cout << "  Traces: \n";
 
-  for(auto i : trace){
+  for(auto i : traces){
     std::cout << "  " << i << "\n";
   }
 
@@ -321,109 +319,6 @@ void print_trace(){
   traces.clear();
 
   return;
-}*/
-/*void goto_symext::symex_goto(statet &state)
-{
-  printf("Symex-goto is called\n");
-  PRECONDITION(state.reachable);
-  trace.push_back(state.source.pc->source_location());
-
-  const goto_programt::instructiont &instruction = *state.source.pc;
-
-  exprt new_guard = clean_expr(instruction.condition(), state, false);
-
-  renamedt<exprt, L2> renamed_guard = state.rename(std::move(new_guard), ns);
-  renamed_guard = try_evaluate_pointer_comparisons(
-    std::move(renamed_guard), state.value_set, language_mode, ns);
-  if (symex_config.simplify_opt)
-    renamed_guard.simplify(ns);
-  new_guard = renamed_guard.get();
-
-  if (new_guard.is_false())
-  {
-    std::cout << "Guard: " << new_guard.is_true() << "\n";
-    target.location(state.guard.as_expr(), state.source);
-
-    // Next instruction
-    symex_transition(state);
-    print_trace();
-    return; // Nothing to do
-  }
-
-  target.goto_instruction(state.guard.as_expr(), renamed_guard, state.source);
-
-  DATA_INVARIANT(
-    !instruction.targets.empty(), "goto should have at least one target");
-
-  // We only do deterministic gotos for now
-  DATA_INVARIANT(
-    instruction.targets.size() == 1, "no support for non-deterministic gotos");
-
-  goto_programt::const_targett goto_target = instruction.get_target();
-  const bool backward = instruction.is_backwards_goto();
-
-  if (backward)
-  {
-    const auto loop_id =
-      goto_programt::loop_id(state.source.function_id, *state.source.pc);
-
-    unsigned &unwind = state.call_stack().top().loop_iterations[loop_id].count;
-    unwind++;
-
-    if (should_stop_unwind(state.source, state.call_stack(), unwind))
-    {
-      // Break the loop
-      loop_bound_exceeded(state, new_guard);
-
-      // Next instruction
-      symex_transition(state);
-      print_trace();
-      return;
-    }
-
-    if (new_guard.is_true())
-    {
-      // Continue executing the loop
-      symex_transition(state, goto_target, true);
-      print_trace();
-      return; // Nothing else to do
-    }
-  }
-
-  goto_programt::const_targett state_pc = state.source.pc;
-  state_pc++;
-
-  // Handle path exploration using trace[]
-  if (symex_config.doing_path_exploration)
-  {
-    printf("Doing Path exploration \n");
-    if (traces.size() <= trace_idx)
-    {
-      // Record both paths if not already saved
-      traces.push_back(state_pc);    // Next instruction
-      traces.push_back(goto_target);        // Goto target
-    }
-
-    // Select path to follow based on trace index
-    goto_programt::const_targett next_path = traces[trace_idx];
-    trace_idx++; // Increment trace index for the next step
-
-    log.debug() << "Following path at index " << trace_idx - 1 << ": '"
-                << next_path->source_location() << "'" << log.eom;
-
-    // Transition to the selected path
-    std::cout << "Next Path: " << next_path->source_location() << "\n";
-    symex_transition(state, next_path, backward);
-
-    should_pause_symex = true; // Indicate that execution should pause
-    print_trace();
-    return;
-  }
-
-
-  // Unconditionally follow the next instruction if not exploring paths
-  symex_transition(state, state_pc, backward);
-  print_trace();
 }*/
 
 void goto_symext::symex_goto(statet &state)
@@ -781,7 +676,7 @@ void goto_symext::symex_goto(statet &state)
     }
   }
   print_trace();
-} //Test
+}
 
 
 
