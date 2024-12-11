@@ -322,7 +322,7 @@ void print_trace(){
 
   return;
 }*/
-void goto_symext::symex_goto(statet &state)
+/*void goto_symext::symex_goto(statet &state)
 {
   printf("Symex-goto is called\n");
   PRECONDITION(state.reachable);
@@ -424,9 +424,9 @@ void goto_symext::symex_goto(statet &state)
   // Unconditionally follow the next instruction if not exploring paths
   symex_transition(state, state_pc, backward);
   print_trace();
-}
+}*/
 
-/*void goto_symext::symex_goto(statet &state)
+void goto_symext::symex_goto(statet &state)
 {
   printf("Symex-Goto is called\n");
 
@@ -781,7 +781,7 @@ void goto_symext::symex_goto(statet &state)
     }
   }
   print_trace();
-}*/
+}
 
 
 
