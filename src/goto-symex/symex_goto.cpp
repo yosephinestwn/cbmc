@@ -460,7 +460,12 @@ void goto_symext::symex_goto(statet &state)
       instruction.targets.size() > 0,
       "Instruction is an unconditional goto with no target: " +
         instruction.code().pretty());
-    symex_transition(state, instruction.get_target(), true);
+    if(!traces.empty()){
+      goto_programt::const_targett next_path = traces[trace_idx];
+      trace_idx++; // Increment trace index for the next step
+      symex_transition(state, next_path, false);
+    }
+    else symex_transition(state, instruction.get_target(), true);
     print_trace();
     return;
   }
@@ -468,7 +473,7 @@ void goto_symext::symex_goto(statet &state)
   goto_programt::const_targett new_state_pc, state_pc;
   symex_targett::sourcet original_source=state.source;
 
-  /*if(!backward)
+  if(!backward)
   {
     new_state_pc=goto_target;
     state_pc=state.source.pc;
@@ -481,7 +486,12 @@ void goto_symext::symex_goto(statet &state)
 
     if(state_pc==goto_target)
     {
-      symex_transition(state, goto_target, false);
+      if(!traces.empty()){
+        goto_programt::const_targett next_path = traces[trace_idx];
+        trace_idx++; // Increment trace index for the next step
+        symex_transition(state, next_path, false);
+      }
+      else symex_transition(state, goto_target, false);
       print_trace();
       return; // nothing else to do
     }
@@ -491,11 +501,8 @@ void goto_symext::symex_goto(statet &state)
     new_state_pc=state.source.pc;
     new_state_pc++;
     state_pc=goto_target;
-  }*/
+  }
 
-
-  state_pc = state.source.pc;
-  state_pc++;
 
   // Handle path exploration using trace[]
   //if (symex_config.doing_path_exploration)
@@ -504,7 +511,7 @@ void goto_symext::symex_goto(statet &state)
     {
       // Record both paths if not already saved
       traces.push_back(state_pc);    // Next instruction
-      traces.push_back(goto_target);        // Goto target
+      traces.push_back(new_state_pc);        //Next target
     }
 
     // Select path to follow based on trace index
@@ -526,7 +533,7 @@ void goto_symext::symex_goto(statet &state)
     next_instruction.state.has_saved_next_instruction = true;
 
     path_storaget::patht jump_target(target, state);
-    jump_target.state.saved_target = goto_target;
+    jump_target.state.saved_target = new_state_pc;
     jump_target.state.has_saved_jump_target = true;
     // `forward` tells us where the branch we're _currently_ executing is
     // pointing to; this needs to be inverted for the branch that we're saving,
