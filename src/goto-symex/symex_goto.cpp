@@ -481,36 +481,9 @@ void goto_symext::symex_goto(statet &state)
   /*goto_programt::const_targett state_pc = state.source.pc;
   state_pc++;*/
 
-  if(state.has_saved_jump_target)
-  {
-    INVARIANT(
-      new_state_pc == state.saved_target,
-      "Tried to explore the other path of a branch, but the next "
-      "instruction along that path is not the same as the instruction "
-      "that we saved at the branch point. Saved instruction is " +
-        state.saved_target->code().pretty() +
-        "\nwe were intending "
-        "to explore " +
-        new_state_pc->code().pretty() +
-        "\nthe "
-        "instruction we think we saw on a previous path exploration is " +
-        state_pc->code().pretty());
-    goto_programt::const_targett tmp = new_state_pc;
-    new_state_pc = state_pc;
-    state_pc = tmp;
-
-    log.debug() << "Resuming from jump target '" << state_pc->source_location()
-                << "'" << log.eom;
-  }
-  else if(state.has_saved_next_instruction)
-  {
-    log.debug() << "Resuming from next instruction '"
-                << state_pc->source_location() << "'" << log.eom;
-  }
   // Handle path exploration using trace[]
-  else if (symex_config.doing_path_exploration)
+  if (symex_config.doing_path_exploration)
   {
-    printf("Doing Path exploration \n");
     if (traces.size() <= trace_idx)
     {
       // Record both paths if not already saved
