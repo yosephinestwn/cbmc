@@ -340,7 +340,6 @@ void goto_symext::symex_goto(statet &state)
 
   if (new_guard.is_false())
   {
-    std::cout << "Guard: " << new_guard.is_true() << "\n";
     target.location(state.guard.as_expr(), state.source);
 
     // Next instruction
@@ -526,7 +525,7 @@ void goto_symext::symex_goto(statet &state)
     next_instruction.state.has_saved_next_instruction = true;
 
     path_storaget::patht jump_target(target, state);
-    jump_target.state.saved_target = new_state_pc;
+    jump_target.state.saved_target = goto_target;
     jump_target.state.has_saved_jump_target = true;
     // `forward` tells us where the branch we're _currently_ executing is
     // pointing to; this needs to be inverted for the branch that we're saving,
