@@ -327,7 +327,7 @@ void print_next_instructions(){
   std::cout << "  Next instructions: \n";
 
   for (std::size_t i = 0; i < traces.size(); i++){
-    std::cout << "  " << traces[i] << "\n";
+    std::cout << "  " << traces[i]->source_location() << "\n";
   }
 
   std::cout << "\n" << std::endl;
