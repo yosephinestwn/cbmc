@@ -324,6 +324,7 @@ void print_trace(){
 }*/
 void goto_symext::symex_goto(statet &state)
 {
+  printf("Symex_goto is called\n");
   PRECONDITION(state.reachable);
   trace.push_back(state.source.pc->source_location());
 
@@ -546,7 +547,7 @@ void goto_symext::symex_goto(statet &state)
 
     should_pause_symex = true; // Indicate that execution should pause
     print_trace();
-    return;
+    //return;
   }
 
   // put a copy of the current state into the state-queue, to be used by
