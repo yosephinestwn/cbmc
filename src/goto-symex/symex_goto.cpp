@@ -527,7 +527,7 @@ void goto_symext::symex_goto(statet &state)
 
     // Transition to the selected path
     std::cout << "Next Path: " << next_path->source_location() << "\n";
-    symex_transition(state, next_path, backward);
+    symex_transition(state, next_path, false);
 
     // We should save both the instruction after this goto, and the target of
     // the goto.
