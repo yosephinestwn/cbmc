@@ -335,7 +335,6 @@ void goto_symext::symex_goto(statet &state)
   const bool backward = instruction.is_backwards_goto();
 
   goto_programt::const_targett state_pc = state.source.pc;
-  symex_targett::sourcet original_source=state.source;
 
 
   // Handle path exploration using trace[]
