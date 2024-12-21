@@ -344,7 +344,12 @@ void goto_symext::symex_goto(statet &state)
     target.location(state.guard.as_expr(), state.source);
 
     // Next instruction
-    symex_transition(state);
+    if(!traces.empty()){
+      goto_programt::const_targett next_path = traces[trace_idx];
+      trace_idx++; // Increment trace index for the next step
+      symex_transition(state, next_path, false);
+    }
+    else symex_transition(state);
     print_trace();
     return; // Nothing to do
   }
@@ -394,7 +399,12 @@ void goto_symext::symex_goto(statet &state)
       symex_assume_l2(state, negated_guard);
 
       // next instruction
-      symex_transition(state);
+      if(!traces.empty()){
+        goto_programt::const_targett next_path = traces[trace_idx];
+        trace_idx++; // Increment trace index for the next step
+        symex_transition(state, next_path, false);
+      }
+      else symex_transition(state);
       print_trace();
       return;
     }
@@ -411,7 +421,12 @@ void goto_symext::symex_goto(statet &state)
       // we break the loop
       loop_bound_exceeded(state, new_guard);
       // next instruction
-      symex_transition(state);
+      if(!traces.empty()){
+        goto_programt::const_targett next_path = traces[trace_idx];
+        trace_idx++; // Increment trace index for the next step
+        symex_transition(state, next_path, false);
+      }
+      else symex_transition(state);
       print_trace();
       return;
     }
@@ -453,7 +468,7 @@ void goto_symext::symex_goto(statet &state)
   goto_programt::const_targett new_state_pc, state_pc;
   symex_targett::sourcet original_source=state.source;
 
-  if(!backward)
+  /*if(!backward)
   {
     new_state_pc=goto_target;
     state_pc=state.source.pc;
@@ -476,7 +491,8 @@ void goto_symext::symex_goto(statet &state)
     new_state_pc=state.source.pc;
     new_state_pc++;
     state_pc=goto_target;
-  }
+  }*/
+
 
   /*goto_programt::const_targett state_pc = state.source.pc;
   state_pc++;*/
