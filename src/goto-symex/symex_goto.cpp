@@ -322,6 +322,17 @@ void print_trace(){
 
   return;
 }*/
+
+void print_next_instructions(){
+  std::cout << "  Next instructions: \n";
+
+  for (int i = 0; i < traces.size(); i++){
+    std::cout << "  " << traces[i] << "\n";
+  }
+
+  std::cout << "\n" << std::endl;
+}
+
 void goto_symext::symex_goto(statet &state)
 {
   printf("Symex_goto is called\n");
@@ -358,8 +369,10 @@ void goto_symext::symex_goto(statet &state)
 
   should_pause_symex = true; // Indicate that execution should pause
   print_trace();
+  print_next_instructions();
   return;
 }
+
 
 /*void goto_symext::symex_goto(statet &state)
 {
