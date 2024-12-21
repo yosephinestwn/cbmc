@@ -363,7 +363,6 @@ void goto_symext::symex_goto(statet &state)
 
   if(backward)
   {
-    printf("\nIs backward\n");
     // is it label: goto label; or while(cond); - popular in SV-COMP
     if(
       symex_config.self_loops_to_assumptions &&
@@ -450,7 +449,6 @@ void goto_symext::symex_goto(statet &state)
       "Instruction is an unconditional goto with no target: " +
         instruction.code().pretty());
     symex_transition(state, instruction.get_target(), true);
-    printf("\nIs unconditional goto\n");
     print_trace();
     return;
   }
@@ -464,8 +462,6 @@ void goto_symext::symex_goto(statet &state)
     state_pc=state.source.pc;
     state_pc++;
 
-    printf("\nnew_state_pc=goto_target - not backward\n");
-
     // skip dead instructions
     if(new_guard.is_true())
       while(state_pc!=goto_target && !state_pc->is_target())
@@ -475,7 +471,6 @@ void goto_symext::symex_goto(statet &state)
     {
       symex_transition(state, goto_target, false);
       trace.push_back(state.source.pc->source_location());
-      printf("\nstate_pc==goto_target\n");
       print_trace();
       return; // nothing else to do
     }
@@ -487,7 +482,6 @@ void goto_symext::symex_goto(statet &state)
     state_pc=goto_target;
     trace.push_back(state.source.pc->source_location());
 
-    printf("\nnew_state_pc=state.source.pc - backward\n");
   }
 
   /*goto_programt::const_targett state_pc = state.source.pc;
@@ -513,13 +507,11 @@ void goto_symext::symex_goto(statet &state)
 
     log.debug() << "Resuming from jump target '" << state_pc->source_location()
                 << "'" << log.eom;
-    printf("\njump target is saved\n");
   }
   else if(state.has_saved_next_instruction)
   {
     log.debug() << "Resuming from next instruction '"
                 << state_pc->source_location() << "'" << log.eom;
-    printf("\nnext instruction is saved\n");
   }
   // Handle path exploration using trace[]
   else if (symex_config.doing_path_exploration)
