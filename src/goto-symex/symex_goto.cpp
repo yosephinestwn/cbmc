@@ -482,7 +482,7 @@ void goto_symext::symex_goto(statet &state)
   state_pc++;*/
 
   // Handle path exploration using trace[]
-  if (symex_config.doing_path_exploration)
+  //if (symex_config.doing_path_exploration)
   {
     if (traces.size() <= trace_idx)
     {
