@@ -326,7 +326,7 @@ void print_trace(){
 void print_next_instructions(){
   std::cout << "  Next instructions: \n";
 
-  for (int i = 0; i < traces.size(); i++){
+  for (std::size_t i = 0; i < traces.size(); i++){
     std::cout << "  " << traces[i] << "\n";
   }
 
