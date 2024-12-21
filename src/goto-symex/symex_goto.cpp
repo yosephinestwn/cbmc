@@ -330,8 +330,6 @@ void goto_symext::symex_goto(statet &state)
 
   const goto_programt::instructiont &instruction = *state.source.pc;
 
-
-  target.goto_instruction(state.guard.as_expr(), renamed_guard, state.source);
   goto_programt::const_targett goto_target=
     instruction.get_target();
   const bool backward = instruction.is_backwards_goto();
