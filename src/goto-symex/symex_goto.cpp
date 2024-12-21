@@ -494,8 +494,8 @@ void goto_symext::symex_goto(statet &state)
   }*/
 
 
-  /*goto_programt::const_targett state_pc = state.source.pc;
-  state_pc++;*/
+  state_pc = state.source.pc;
+  state_pc++;
 
   // Handle path exploration using trace[]
   //if (symex_config.doing_path_exploration)
