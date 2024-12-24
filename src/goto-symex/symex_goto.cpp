@@ -347,6 +347,25 @@ void goto_symext::symex_goto(statet &state)
 
   goto_programt::const_targett state_pc = state.source.pc;
 
+  if (instruction.is_backwards_goto()) {
+    exprt new_guard = clean_expr(instruction.condition(), state, false);
+    const auto loop_id = goto_programt::loop_id(state.source.function_id, *state.source.pc);
+    unsigned &unwind = state.call_stack().top().loop_iterations[loop_id].count;
+    unwind++;
+    printf("Unwind: %u\n", unwind);
+
+    if (should_stop_unwind(state.source, state.call_stack(), unwind)) {
+      loop_bound_exceeded(state, new_guard);
+      print_trace();
+      print_next_instructions();
+      return;
+    }
+    symex_transition(state, goto_target, true);
+    print_trace();
+    print_next_instructions();
+    return;
+  }
+
 
   // Handle path exploration using trace[]
   if (traces.size() <= trace_idx)
