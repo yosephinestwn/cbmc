@@ -33,7 +33,7 @@ Author: Daniel Kroening, kroening@kroening.com
 
 std::vector<goto_programt::const_targett> traces;
 std::list<source_locationt> trace;
-int pointer = 0;
+bool path_still_available = 1;
 std::size_t trace_idx = 0;
 
 void goto_symext::apply_goto_condition(
@@ -380,6 +380,7 @@ void goto_symext::symex_goto(statet &state)
   goto_programt::const_targett next_path = traces[trace_idx];
   std::cout << "Traces index: " << trace_idx <<"\n";
   trace_idx++; // Increment trace index for the next step
+  if(trace_idx > traces.size()) path_still_available = 0;
 
   log.debug() << "Following path at index " << trace_idx - 1 << ": '"
               << next_path->source_location() << "'" << log.eom;
@@ -391,7 +392,7 @@ void goto_symext::symex_goto(statet &state)
   //should_pause_symex = true; // Indicate that execution should pause
   print_trace();
   print_next_instructions();
-  if(trace_idx < traces.size())
+  if(path_still_available)
     symex_goto(state);
   return;
 }
