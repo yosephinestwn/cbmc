@@ -341,7 +341,6 @@ void goto_symext::symex_goto(statet &state)
 
   const goto_programt::instructiont &instruction = *state.source.pc;
 
-  std::cout << "Goto target size: " << instruction.targets.size() << "\n";
   if(instruction.targets.size() != 1){
     print_trace();
     print_next_instructions();
