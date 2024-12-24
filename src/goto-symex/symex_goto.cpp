@@ -344,6 +344,7 @@ void goto_symext::symex_goto(statet &state)
   goto_programt::const_targett goto_target=
     instruction.get_target();
   const bool backward = instruction.is_backwards_goto();
+  std::cout << "Backward or no: " << backward << "\n";
 
   goto_programt::const_targett state_pc = state.source.pc;
 
@@ -385,10 +386,9 @@ void goto_symext::symex_goto(statet &state)
 
   // Transition to the selected path
   std::cout << "Next Path: " << next_path->source_location() << "\n";
-  std::cout << "Backward or no: " << backward << "\n";
   symex_transition(state, next_path, backward);
 
-  should_pause_symex = true; // Indicate that execution should pause
+  //should_pause_symex = true; // Indicate that execution should pause
   print_trace();
   print_next_instructions();
   if(trace_idx < traces.size())
