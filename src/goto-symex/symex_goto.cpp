@@ -370,9 +370,9 @@ void goto_symext::symex_goto(statet &state)
   should_pause_symex = true; // Indicate that execution should pause
   print_trace();
   print_next_instructions();
+  std::cout << "Traces index: " << trace_idx <<"\n";
   if(trace_idx < traces.size())
     symex_goto(state);
-  std::cout << "Traces index: " << trace_idx <<"\n";
   return;
 }
 
