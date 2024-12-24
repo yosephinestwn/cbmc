@@ -373,7 +373,7 @@ void goto_symext::symex_goto(statet &state)
   if (traces.size() <= trace_idx)
   {
     // Record both paths if not already saved
-    traces.push_back(state_pc);// Next instruction
+    traces.push_back(goto_target);// Next instruction
   }
 
   // Select path to follow based on trace index
