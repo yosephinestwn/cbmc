@@ -367,13 +367,14 @@ void goto_symext::symex_goto(statet &state)
     return;
   }
 
+  goto_programt::const_targett new_state_pc = state.source.pc;
+  new_state_pc++;
 
   // Handle path exploration using trace[]
   if (traces.size() <= trace_idx)
   {
     // Record both paths if not already saved
-    traces.push_back(state_pc);    // Next instruction
-    traces.push_back(goto_target);
+    traces.push_back(new_state_pc);// Next instruction
   }
 
   // Select path to follow based on trace index
