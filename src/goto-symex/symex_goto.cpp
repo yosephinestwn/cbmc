@@ -367,8 +367,7 @@ void goto_symext::symex_goto(statet &state)
     return;
   }
 
-  goto_programt::const_targett new_state_pc = state.source.pc;
-  new_state_pc++;
+  state_pc++;
 
   // Handle path exploration using trace[]
   if (traces.size() <= trace_idx)
