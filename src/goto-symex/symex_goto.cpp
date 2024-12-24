@@ -372,6 +372,7 @@ void goto_symext::symex_goto(statet &state)
   print_next_instructions();
   if(trace_idx < traces.size())
     symex_goto(state);
+  std::cout << "Traces index: " << trace_idx <<"\n";
   return;
 }
 
