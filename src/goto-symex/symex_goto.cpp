@@ -354,7 +354,7 @@ void goto_symext::symex_goto(statet &state)
 
   goto_programt::const_targett state_pc = state.source.pc;
 
-  if (instruction.is_backwards_goto()) {
+  /*if (instruction.is_backwards_goto()) {
     exprt new_guard = clean_expr(instruction.condition(), state, false);
     const auto loop_id = goto_programt::loop_id(state.source.function_id, *state.source.pc);
     unsigned &unwind = state.call_stack().top().loop_iterations[loop_id].count;
@@ -371,6 +371,79 @@ void goto_symext::symex_goto(statet &state)
     print_trace();
     print_next_instructions();
     return;
+  }*/
+
+  if(backward)
+  {
+    exprt new_guard = clean_expr(instruction.condition(), state, false);
+    // is it label: goto label; or while(cond); - popular in SV-COMP
+    if(
+      symex_config.self_loops_to_assumptions &&
+      // label: goto label; or do {} while(cond);
+      (goto_target == state.source.pc ||
+       // while(cond);
+       (instruction.incoming_edges.size() == 1 &&
+        *instruction.incoming_edges.begin() == goto_target &&
+        goto_target->is_goto() && new_guard.is_true())))
+    {
+      // generate assume(false) or a suitable negation if this
+      // instruction is a conditional goto
+      exprt negated_guard = boolean_negate(new_guard);
+      do_simplify(negated_guard);
+      log.statistics() << "replacing self-loop at "
+                       << state.source.pc->source_location() << " by assume("
+                       << from_expr(ns, state.source.function_id, negated_guard)
+                       << ")" << messaget::eom;
+      std::cout << "replacing self-loop at "
+                << state.source.pc->source_location() << " by assume("
+                << from_expr(ns, state.source.function_id, negated_guard)
+                << ")\n";
+      if(symex_config.unwinding_assertions)
+      {
+        log.warning()
+          << "no unwinding assertion will be generated for self-loop at "
+          << state.source.pc->source_location() << messaget::eom;
+      }
+      symex_assume_l2(state, negated_guard);
+
+      // next instruction
+      symex_transition(state);
+      print_trace();
+      print_next_instructions();
+      return;
+    }
+
+    const auto loop_id =
+      goto_programt::loop_id(state.source.function_id, *state.source.pc);
+
+    unsigned &unwind = state.call_stack().top().loop_iterations[loop_id].count;
+    unwind++;
+    std::cout << "Unwind " << unwind << std::endl;
+
+    if(should_stop_unwind(state.source, state.call_stack(), unwind))
+    {
+      // we break the loop
+      loop_bound_exceeded(state, new_guard);
+      // next instruction
+      symex_transition(state);
+      print_trace();
+      print_next_instructions();
+      return;
+    }
+
+    if(new_guard.is_true())
+    {
+
+      // we continue executing the loop
+      if(check_break(loop_id, unwind))
+      {
+        should_pause_symex = true;
+      }
+      symex_transition(state, goto_target, true);
+      print_trace();
+      print_next_instructions();
+      return; // nothing else to do
+    }
   }
 
   state_pc++;
