@@ -358,6 +358,7 @@ void goto_symext::symex_goto(statet &state)
 
   // Select path to follow based on trace index
   goto_programt::const_targett next_path = traces[trace_idx];
+  std::cout << "Traces index: " << trace_idx <<"\n";
   trace_idx++; // Increment trace index for the next step
 
   log.debug() << "Following path at index " << trace_idx - 1 << ": '"
@@ -365,12 +366,12 @@ void goto_symext::symex_goto(statet &state)
 
   // Transition to the selected path
   std::cout << "Next Path: " << next_path->source_location() << "\n";
+  std::cout << "Backward or no: " << backward << "\n";
   symex_transition(state, next_path, backward);
 
   should_pause_symex = true; // Indicate that execution should pause
   print_trace();
   print_next_instructions();
-  std::cout << "Traces index: " << trace_idx <<"\n";
   if(trace_idx < traces.size())
     symex_goto(state);
   return;
