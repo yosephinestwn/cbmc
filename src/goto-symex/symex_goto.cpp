@@ -370,6 +370,8 @@ void goto_symext::symex_goto(statet &state)
   should_pause_symex = true; // Indicate that execution should pause
   print_trace();
   print_next_instructions();
+  if(trace_idx < traces.size())
+    symex_goto(state);
   return;
 }
 
