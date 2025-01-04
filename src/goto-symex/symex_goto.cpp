@@ -346,7 +346,7 @@ void goto_symext::symex_goto(statet &state)
     return;
   }
 
-  //goto_programt::const_targett goto_target= instruction.get_target();
+  goto_programt::const_targett goto_target= instruction.get_target();
 
   if (!instruction.is_function_call()){
     printf("The verified function is not called! Please make a function-call with actual input(s) for this function in a main function!");
@@ -373,8 +373,7 @@ void goto_symext::symex_goto(statet &state)
   if(evaluated_condition.is_false())
   {
     // Skip this path if the condition evaluates to false
-    target.location(state.guard.as_expr(), state.source);
-    symex_transition(state);
+    symex_transition(goto_target);
     print_trace();
     print_next_instructions();
     return;
@@ -382,8 +381,11 @@ void goto_symext::symex_goto(statet &state)
   goto_programt::const_targett state_pc = state.source.pc;
   state_pc++;
 
-  // Handle path exploration using trace[]
-  traces.push_back(state_pc); // Next instruction
+  if (traces.size() <= trace_idx)
+  {
+    // Record both paths if not already saved
+    traces.push_back(state_pc);// Next instruction
+  }
 
   // Select path to follow based on trace index
   goto_programt::const_targett next_path = traces[trace_idx];
@@ -400,7 +402,7 @@ void goto_symext::symex_goto(statet &state)
   print_trace();
   print_next_instructions();
 
-  if(trace_idx > traces.size()) path_still_available = 0;
+  if(trace_idx >= traces.size()) path_still_available = 0;
   if(path_still_available)
     symex_goto(state);
   return;
