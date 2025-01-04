@@ -341,29 +341,37 @@ void goto_symext::symex_goto(statet &state)
 
   const goto_programt::instructiont &instruction = *state.source.pc;
 
-  const bool backward = instruction.is_backwards_goto();
-
   if(instruction.targets.size() != 1){
     print_trace();
     print_next_instructions();
-    if(trace_idx >= traces.size()) path_still_available = 0;
-    if(path_still_available)
-    {
-      std::cout << "Traces index: " << trace_idx <<"\n";
-      goto_programt::const_targett next_path = traces[trace_idx];
-      trace_idx++;
-      symex_transition(state, next_path, backward);
-      symex_goto(state);
-    }
     return;
   }
 
   goto_programt::const_targett goto_target=
     instruction.get_target();
-
+  const bool backward = instruction.is_backwards_goto();
   std::cout << "Backward or no: " << backward << "\n";
 
   goto_programt::const_targett state_pc = state.source.pc;
+
+  /*if (instruction.is_backwards_goto()) {
+    exprt new_guard = clean_expr(instruction.condition(), state, false);
+    const auto loop_id = goto_programt::loop_id(state.source.function_id, *state.source.pc);
+    unsigned &unwind = state.call_stack().top().loop_iterations[loop_id].count;
+    unwind++;
+    printf("Unwind: %u\n", unwind);
+
+    if (should_stop_unwind(state.source, state.call_stack(), unwind)) {
+      loop_bound_exceeded(state, new_guard);
+      print_trace();
+      print_next_instructions();
+      return;
+    }
+    symex_transition(state, goto_target, true);
+    print_trace();
+    print_next_instructions();
+    return;
+  }*/
 
   if(backward)
   {
@@ -438,20 +446,19 @@ void goto_symext::symex_goto(statet &state)
     }
   }
 
-  //goto_programt::const_targett current_state_pc = state_pc;
   state_pc++;
 
   // Handle path exploration using trace[]
   if (traces.size() <= trace_idx)
   {
     // Record both paths if not already saved
-    traces.push_back(goto_target);
+    traces.push_back(goto_target);// Next instruction
   }
 
   // Select path to follow based on trace index
   goto_programt::const_targett next_path = traces[trace_idx];
   trace_idx++; // Increment trace index for the next step
-  if(trace_idx >= traces.size()) path_still_available = 0;
+  if(trace_idx > traces.size()) path_still_available = 0;
 
   log.debug() << "Following path at index " << trace_idx - 1 << ": '"
               << next_path->source_location() << "'" << log.eom;
