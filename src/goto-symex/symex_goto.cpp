@@ -445,7 +445,8 @@ void goto_symext::symex_goto(statet &state)
   {
     // Record both paths if not already saved
     traces.push_back(state_pc);// Next instruction
-    traces.push_back(goto_target);
+    if (state_pc->source_location() != goto_target->source_location())
+      traces.push_back(goto_target);
   }
 
   // Select path to follow based on trace index
