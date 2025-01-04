@@ -384,18 +384,16 @@ void goto_symext::symex_goto(statet &state)
   traces.push_back(state.source.pc); // Next instruction
 
   // Select path to follow based on trace index
-  if (trace_idx < trace.size()){
-    goto_programt::const_targett next_path = traces[trace_idx];
-    trace_idx++; // Increment trace index for the next step
-    if(trace_idx >= traces.size()) path_still_available = 0;
+  goto_programt::const_targett next_path = traces[trace_idx];
+  trace_idx++; // Increment trace index for the next step
+  if(trace_idx >= traces.size()) path_still_available = 0;
 
-    log.debug() << "Following path at index " << trace_idx - 1 << ": '"
-                << next_path->source_location() << "'" << log.eom;
+  log.debug() << "Following path at index " << trace_idx - 1 << ": '"
+              << next_path->source_location() << "'" << log.eom;
 
-    // Transition to the selected path
-    std::cout << "Next Path: " << next_path->source_location() << "\n";
-    symex_transition(state, next_path, false);
-  }
+  // Transition to the selected path
+  std::cout << "Next Path: " << next_path->source_location() << "\n";
+  symex_transition(state, next_path, false);
 
   print_trace();
   print_next_instructions();
