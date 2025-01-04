@@ -438,14 +438,16 @@ void goto_symext::symex_goto(statet &state)
     }
   }
 
+  goto_programt::const_targett current_state_pc = state_pc;
   state_pc++;
 
   // Handle path exploration using trace[]
   if (traces.size() <= trace_idx)
   {
     // Record both paths if not already saved
-    traces.push_back(state_pc);// Next instruction
-    if (state_pc->source_location() != goto_target->source_location())
+    if (current_state_pc != state_pc)
+      traces.push_back(state_pc);
+    if (current_state_pc != goto_target)
       traces.push_back(goto_target);
   }
 
