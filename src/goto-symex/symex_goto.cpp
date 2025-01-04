@@ -346,7 +346,7 @@ void goto_symext::symex_goto(statet &state)
   if(instruction.targets.size() != 1){
     print_trace();
     print_next_instructions();
-    if(trace_idx > traces.size()) path_still_available = 0;
+    if(trace_idx >= traces.size()) path_still_available = 0;
     if(path_still_available)
     {
       std::cout << "Traces index: " << trace_idx <<"\n";
