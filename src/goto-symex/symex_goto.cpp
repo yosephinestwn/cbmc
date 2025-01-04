@@ -333,22 +333,6 @@ void print_next_instructions(){
   std::cout << "\n" << std::endl;
 }
 
-exprt evaluate_with_inputs(statet &state, const exprt &condition, const exprt::operandst &inputs)
-{
-  exprt evaluated_condition = clean_expr(condition, state, false);
-
-
-  // Replace symbolic variables in the condition with concrete input values
-  for(const auto &input : inputs)
-  {
-    evaluated_condition = clean_expr(input, state, false);
-    if(symex_config.simplify_opt)
-      evaluated_condition.simplify(ns);
-    evaluated_condition = evaluated_condition.get();
-  }
-  return evaluated_condition;
-}
-
 void goto_symext::symex_goto(statet &state)
 {
   PRECONDITION(state.reachable);
@@ -372,10 +356,22 @@ void goto_symext::symex_goto(statet &state)
     return;
   }
 
-  exprt concrete_condition =
-    evaluate_with_inputs(state, instruction.condition(), instruction.call_arguments());
+  exprt evaluated_condition = clean_expr(condition, state, false);
 
-  if(concrete_condition.is_false())
+
+  // Evaluate with actual inputs
+  for(const auto &input : instruction.call_arguments())
+  {
+    evaluated_condition = clean_expr(input, state, false);
+    renamedt<exprt, L2> renamed_guard = state.rename(std::move(evaluated_condition), ns);
+    renamed_guard = try_evaluate_pointer_comparisons(
+      std::move(renamed_guard), state.value_set, language_mode, ns);
+    if(symex_config.simplify_opt)
+      evaluated_condition.simplify(ns);
+    evaluated_condition = evaluated_condition.get();
+  }
+
+  if(evaluated_condition.is_false())
   {
     // Skip this path if the condition evaluates to false
     target.location(state.guard.as_expr(), state.source);
