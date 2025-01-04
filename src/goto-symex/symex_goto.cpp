@@ -349,6 +349,7 @@ void goto_symext::symex_goto(statet &state)
     if(trace_idx > traces.size()) path_still_available = 0;
     if(path_still_available)
     {
+      std::cout << "Traces index: " << trace_idx <<"\n";
       goto_programt::const_targett next_path = traces[trace_idx];
       trace_idx++;
       symex_transition(state, next_path, backward);
@@ -449,7 +450,6 @@ void goto_symext::symex_goto(statet &state)
 
   // Select path to follow based on trace index
   goto_programt::const_targett next_path = traces[trace_idx];
-  std::cout << "Traces index: " << trace_idx <<"\n";
   trace_idx++; // Increment trace index for the next step
   if(trace_idx > traces.size()) path_still_available = 0;
 
