@@ -438,7 +438,7 @@ void goto_symext::symex_goto(statet &state)
     }
   }
 
-  goto_programt::const_targett current_state_pc = state_pc;
+  //goto_programt::const_targett current_state_pc = state_pc;
   state_pc++;
 
   // Handle path exploration using trace[]
