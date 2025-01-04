@@ -342,12 +342,9 @@ exprt evaluate_with_inputs(statet &state, const exprt &condition, const exprt::o
   for(const auto &input : inputs)
   {
     evaluated_condition = clean_expr(input, state, false);
-    renamedt<exprt, L2> renamed_guard = state.rename(std::move(evaluated_condition), ns);
-    renamed_guard = try_evaluate_pointer_comparisons(
-      std::move(renamed_guard), state.value_set, language_mode, ns);
     if(symex_config.simplify_opt)
-      renamed_guard.simplify(ns);
-    evaluated_condition = renamed_guard.get();
+      evaluated_condition.simplify(ns);
+    evaluated_condition = evaluated_condition.get();
   }
   return evaluated_condition;
 }
@@ -404,7 +401,6 @@ void goto_symext::symex_goto(statet &state)
     std::cout << "Next Path: " << next_path->source_location() << "\n";
     symex_transition(state, next_path, false);
   }
-  else state.reachable = false; // Mark end of path
 
   print_trace();
   print_next_instructions();
