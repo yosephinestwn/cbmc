@@ -366,8 +366,8 @@ void goto_symext::symex_goto(statet &state)
     renamed_guard = try_evaluate_pointer_comparisons(
       std::move(renamed_guard), state.value_set, language_mode, ns);
     if(symex_config.simplify_opt)
-      evaluated_condition.simplify(ns);
-    evaluated_condition = evaluated_condition.get();
+      renamed_guard.simplify(ns);
+    evaluated_condition = renamed_guard.get();
   }
 
   if(evaluated_condition.is_false())
