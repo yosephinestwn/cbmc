@@ -379,9 +379,11 @@ void goto_symext::symex_goto(statet &state)
     print_next_instructions();
     return;
   }
+  goto_programt::const_targett state_pc = state.source.pc;
+  state_pc++;
 
   // Handle path exploration using trace[]
-  traces.push_back(state.source.pc); // Next instruction
+  traces.push_back(state_pc); // Next instruction
 
   // Select path to follow based on trace index
   goto_programt::const_targett next_path = traces[trace_idx];
@@ -398,7 +400,7 @@ void goto_symext::symex_goto(statet &state)
   print_trace();
   print_next_instructions();
 
-  if(trace_idx >= traces.size()) path_still_available = 0;
+  if(trace_idx > traces.size()) path_still_available = 0;
   if(path_still_available)
     symex_goto(state);
   return;
