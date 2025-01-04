@@ -341,6 +341,8 @@ void goto_symext::symex_goto(statet &state)
 
   const goto_programt::instructiont &instruction = *state.source.pc;
 
+  const bool backward = instruction.is_backwards_goto();
+
   if(instruction.targets.size() != 1){
     print_trace();
     print_next_instructions();
@@ -356,7 +358,7 @@ void goto_symext::symex_goto(statet &state)
 
   goto_programt::const_targett goto_target=
     instruction.get_target();
-  const bool backward = instruction.is_backwards_goto();
+
   std::cout << "Backward or no: " << backward << "\n";
 
   goto_programt::const_targett state_pc = state.source.pc;
