@@ -403,8 +403,7 @@ void goto_symext::symex_goto(statet &state)
   print_next_instructions();
 
   if(trace_idx >= traces.size()) path_still_available = 0;
-  if(path_still_available)
-    symex_goto(state);
+  //if(path_still_available) symex_goto(state);
   return;
 }
 
