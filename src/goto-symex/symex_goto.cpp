@@ -435,7 +435,7 @@ void goto_symext::symex_goto(statet &state)
   // Select path to follow based on trace index
   goto_programt::const_targett next_path = traces[trace_idx];
   trace_idx++; // Increment trace index for the next step
-  if(trace_idx >= traces.size()) path_still_available = 0;
+  if(trace_idx > traces.size()) path_still_available = 0;
 
   log.debug() << "Following path at index " << trace_idx - 1 << ": '"
               << next_path->source_location() << "'" << log.eom;
