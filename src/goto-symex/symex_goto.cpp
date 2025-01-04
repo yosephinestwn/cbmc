@@ -355,7 +355,7 @@ void goto_symext::symex_goto(statet &state)
     return;
   }
 
-  exprt evaluated_condition = clean_expr(condition, state, false);
+  exprt evaluated_condition = clean_expr(instruction.condition(), state, false);
 
 
   // Evaluate with actual inputs
