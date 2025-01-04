@@ -350,6 +350,7 @@ void goto_symext::symex_goto(statet &state)
     if(path_still_available)
     {
       goto_programt::const_targett next_path = traces[trace_idx];
+      trace_idx++;
       symex_transition(state, next_path, backward);
       symex_goto(state);
     }
