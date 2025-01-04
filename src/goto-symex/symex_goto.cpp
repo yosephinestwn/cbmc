@@ -346,7 +346,7 @@ void goto_symext::symex_goto(statet &state)
     return;
   }
 
-  goto_programt::const_targett goto_target= instruction.get_target();
+  //goto_programt::const_targett goto_target = instruction.get_target();
 
   if (!instruction.is_function_call()){
     printf("The verified function is not called! Please make a function-call with actual input(s) for this function in a main function!");
@@ -373,7 +373,7 @@ void goto_symext::symex_goto(statet &state)
   if(evaluated_condition.is_false())
   {
     // Skip this path if the condition evaluates to false
-    symex_transition(goto_target);
+    symex_transition(state);
     print_trace();
     print_next_instructions();
     return;
