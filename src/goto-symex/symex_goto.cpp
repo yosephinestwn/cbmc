@@ -340,6 +340,8 @@ void goto_symext::symex_goto(statet &state)
 
   const goto_programt::instructiont &instruction = *state.source.pc;
 
+  const bool backward = instruction.is_backwards_goto();
+
   if(instruction.targets.size() != 1){
     print_trace();
     print_next_instructions();
@@ -397,12 +399,11 @@ void goto_symext::symex_goto(statet &state)
 
   // Transition to the selected path
   std::cout << "Next Path: " << next_path->source_location() << "\n";
-  symex_transition(state, next_path, false);
+  symex_transition(state, next_path, backward);
 
   print_trace();
   print_next_instructions();
 
-  if(trace_idx >= traces.size()) path_still_available = 0;
   //if(path_still_available) symex_goto(state);
   return;
 }
