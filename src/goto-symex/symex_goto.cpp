@@ -352,8 +352,6 @@ void goto_symext::symex_goto(statet &state)
   const bool backward = instruction.is_backwards_goto();
   std::cout << "Backward or no: " << backward << "\n";
 
-  goto_programt::const_targett state_pc = state.source.pc;
-
   if(backward)
   {
     exprt new_guard = clean_expr(instruction.condition(), state, false);
