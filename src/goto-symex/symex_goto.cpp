@@ -342,7 +342,6 @@ void goto_symext::symex_goto(statet &state)
   const goto_programt::instructiont &instruction = *state.source.pc;
 
   if(instruction.targets.size() != 1){
-    trace.push_back(state.source.pc->source_location());
     print_trace();
     print_next_instructions();
     return;
