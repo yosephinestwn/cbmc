@@ -335,11 +335,11 @@ void print_next_instructions(){
 
 void goto_symext::symex_goto(statet &state)
 {
+  printf("Symex_goto is called\n");
   PRECONDITION(state.reachable);
+  trace.push_back(state.source.pc->source_location());
 
   const goto_programt::instructiont &instruction = *state.source.pc;
-
-  //const bool backward = instruction.is_backwards_goto();
 
   if(instruction.targets.size() != 1){
     print_trace();
@@ -347,40 +347,93 @@ void goto_symext::symex_goto(statet &state)
     return;
   }
 
-  //goto_programt::const_targett goto_target = instruction.get_target();
+  goto_programt::const_targett goto_target=
+    instruction.get_target();
+  const bool backward = instruction.is_backwards_goto();
+  std::cout << "Backward or no: " << backward << "\n";
 
-  //Record current path
-  traces.push_back(state.source.pc);
-
-  exprt evaluated_condition = clean_expr(instruction.condition(), state, false);
-
-  // Evaluate with actual inputs
-  for(const auto &input : instruction.call_arguments())
+  if(backward)
   {
-    evaluated_condition = clean_expr(input, state, false);
-    renamedt<exprt, L2> renamed_guard = state.rename(std::move(evaluated_condition), ns);
-    renamed_guard = try_evaluate_pointer_comparisons(
-      std::move(renamed_guard), state.value_set, language_mode, ns);
-    if(symex_config.simplify_opt)
-      renamed_guard.simplify(ns);
-    evaluated_condition = renamed_guard.get();
+    exprt new_guard = clean_expr(instruction.condition(), state, false);
+    // is it label: goto label; or while(cond); - popular in SV-COMP
+    if(
+      symex_config.self_loops_to_assumptions &&
+      // label: goto label; or do {} while(cond);
+      (goto_target == state.source.pc ||
+       // while(cond);
+       (instruction.incoming_edges.size() == 1 &&
+        *instruction.incoming_edges.begin() == goto_target &&
+        goto_target->is_goto() && new_guard.is_true())))
+    {
+      // generate assume(false) or a suitable negation if this
+      // instruction is a conditional goto
+      exprt negated_guard = boolean_negate(new_guard);
+      do_simplify(negated_guard);
+      log.statistics() << "replacing self-loop at "
+                       << state.source.pc->source_location() << " by assume("
+                       << from_expr(ns, state.source.function_id, negated_guard)
+                       << ")" << messaget::eom;
+      std::cout << "replacing self-loop at "
+                << state.source.pc->source_location() << " by assume("
+                << from_expr(ns, state.source.function_id, negated_guard)
+                << ")\n";
+      if(symex_config.unwinding_assertions)
+      {
+        log.warning()
+          << "no unwinding assertion will be generated for self-loop at "
+          << state.source.pc->source_location() << messaget::eom;
+      }
+      symex_assume_l2(state, negated_guard);
+
+      // next instruction
+      symex_transition(state);
+      print_trace();
+      print_next_instructions();
+      return;
+    }
+
+    const auto loop_id =
+      goto_programt::loop_id(state.source.function_id, *state.source.pc);
+
+    unsigned &unwind = state.call_stack().top().loop_iterations[loop_id].count;
+    unwind++;
+    std::cout << "Unwind " << unwind << std::endl;
+
+    if(should_stop_unwind(state.source, state.call_stack(), unwind))
+    {
+      // we break the loop
+      loop_bound_exceeded(state, new_guard);
+      // next instruction
+      symex_transition(state);
+      print_trace();
+      print_next_instructions();
+      return;
+    }
+
+    if(new_guard.is_true())
+    {
+
+      // we continue executing the loop
+      if(check_break(loop_id, unwind))
+      {
+        should_pause_symex = true;
+      }
+      symex_transition(state, goto_target, true);
+      print_trace();
+      print_next_instructions();
+      return; // nothing else to do
+    }
   }
 
-  // Skip this path if the condition evaluates to false
-  if(evaluated_condition.is_false())
+  // Handle path exploration using trace[]
+  if (traces.size() <= trace_idx)
   {
-    target.location(state.guard.as_expr(), state.source);
-    symex_transition(state);
-    print_trace();
-    print_next_instructions();
-    return;
+    // Record both paths if not already saved
+    traces.push_back(goto_target);// Next instruction
   }
-  //goto_programt::const_targett state_pc = state.source.pc;
-  //state_pc++;
-
 
   // Select path to follow based on trace index
-  /*goto_programt::const_targett next_path = traces[trace_idx];
+  goto_programt::const_targett next_path = traces[trace_idx];
   trace_idx++; // Increment trace index for the next step
   if(trace_idx >= traces.size()) path_still_available = 0;
 
@@ -391,26 +444,11 @@ void goto_symext::symex_goto(statet &state)
   std::cout << "Next Path: " << next_path->source_location() << "\n";
   symex_transition(state, next_path, backward);
 
-  print_trace();
-  print_next_instructions();*/
-
-  if(trace_idx < trace.size())
-  {
-    goto_programt::const_targett next_path = traces[trace_idx];
-    trace_idx++;
-    symex_transition(state, next_path, false);
-  }
-  else
-  {
-    state.reachable = false; // Mark end of path
-  }
-
-  trace.push_back(state.source.pc->source_location());
-
+  //should_pause_symex = true; // Indicate that execution should pause
   print_trace();
   print_next_instructions();
-
-  //if(path_still_available) symex_goto(state);
+  if(path_still_available)
+    symex_goto(state);
   return;
 }
 
