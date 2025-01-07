@@ -396,7 +396,7 @@ void goto_symext::symex_goto(statet &state)
 
   if(trace_idx < trace.size())
   {
-    goto_programt::const_targett next_path = trace[trace_idx];
+    goto_programt::const_targett next_path = traces[trace_idx];
     trace_idx++;
     symex_transition(state, next_path, false);
   }
