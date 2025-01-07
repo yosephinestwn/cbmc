@@ -336,11 +336,10 @@ void print_next_instructions(){
 void goto_symext::symex_goto(statet &state)
 {
   PRECONDITION(state.reachable);
-  trace.push_back(state.source.pc->source_location());
 
   const goto_programt::instructiont &instruction = *state.source.pc;
 
-  const bool backward = instruction.is_backwards_goto();
+  //const bool backward = instruction.is_backwards_goto();
 
   if(instruction.targets.size() != 1){
     print_trace();
@@ -350,15 +349,10 @@ void goto_symext::symex_goto(statet &state)
 
   //goto_programt::const_targett goto_target = instruction.get_target();
 
-  if (!instruction.is_function_call()){
-    printf("The verified function is not called! Please make a function-call with actual input(s) for this function in a main function!");
-    print_trace();
-    print_next_instructions();
-    return;
-  }
+  //Record current path
+  traces.push_back(state_pc);// Next instruction
 
   exprt evaluated_condition = clean_expr(instruction.condition(), state, false);
-
 
   // Evaluate with actual inputs
   for(const auto &input : instruction.call_arguments())
@@ -372,25 +366,21 @@ void goto_symext::symex_goto(statet &state)
     evaluated_condition = renamed_guard.get();
   }
 
+  // Skip this path if the condition evaluates to false
   if(evaluated_condition.is_false())
   {
-    // Skip this path if the condition evaluates to false
+    target.location(state.guard.as_expr(), state.source);
     symex_transition(state);
     print_trace();
     print_next_instructions();
     return;
   }
-  goto_programt::const_targett state_pc = state.source.pc;
-  state_pc++;
+  //goto_programt::const_targett state_pc = state.source.pc;
+  //state_pc++;
 
-  if (traces.size() <= trace_idx)
-  {
-    // Record both paths if not already saved
-    traces.push_back(state_pc);// Next instruction
-  }
 
   // Select path to follow based on trace index
-  goto_programt::const_targett next_path = traces[trace_idx];
+  /*goto_programt::const_targett next_path = traces[trace_idx];
   trace_idx++; // Increment trace index for the next step
   if(trace_idx >= traces.size()) path_still_available = 0;
 
@@ -400,6 +390,22 @@ void goto_symext::symex_goto(statet &state)
   // Transition to the selected path
   std::cout << "Next Path: " << next_path->source_location() << "\n";
   symex_transition(state, next_path, backward);
+
+  print_trace();
+  print_next_instructions();*/
+
+  if(trace_idx < trace.size())
+  {
+    goto_programt::const_targett next_path = trace[trace_idx];
+    trace_idx++;
+    symex_transition(state, next_path, false);
+  }
+  else
+  {
+    state.reachable = false; // Mark end of path
+  }
+
+  trace.push_back(state.source.pc->source_location());
 
   print_trace();
   print_next_instructions();
