@@ -52,7 +52,7 @@ goto_symex_statet::~goto_symex_statet()=default;
 
 void goto_symex_statet::print_trace(){
   printf("Trace: ");
-  for(const auto &i : state.trace) printf("%d", i);
+  for(const auto &i : trace) printf("%d", i);
   printf("\n");
 }
 
