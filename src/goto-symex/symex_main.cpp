@@ -472,7 +472,7 @@ symbol_tablet goto_symext::symex_from_entry_point_of(
   state->shadow_memory.fields = fields;
 
   auto result = symex_with_state(*state, get_goto_function);
-  *state.print_trace();
+  (*state).print_trace();
   return result;
 }
 
