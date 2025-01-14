@@ -46,6 +46,7 @@ class goto_symex_statet final : public goto_statet
 {
 public:
   std::list<int> trace;
+  void print_trace();
   goto_symex_statet(
     const symex_targett::sourcet &,
     std::size_t max_field_sensitive_array_size,

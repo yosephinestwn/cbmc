@@ -230,6 +230,7 @@ renamedt<exprt, L2> try_evaluate_pointer_comparisons(
 void goto_symext::symex_goto(statet &state)
 {
   PRECONDITION(state.reachable);
+  printf("Symex-goto is called\n");
 
   const goto_programt::instructiont &instruction=*state.source.pc;
 

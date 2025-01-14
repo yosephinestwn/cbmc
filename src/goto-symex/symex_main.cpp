@@ -391,7 +391,9 @@ symbol_tablet goto_symext::resume_symex_from_saved_state(
 
   // Do NOT do the same initialization that `symex_with_state` does for a
   // fresh state, as that would clobber the saved state's program counter
-  return symex_with_state(state, get_goto_function);
+  auto result = symex_with_state(state, get_goto_function);
+  state.print_trace();
+  return result;
 }
 
 std::unique_ptr<goto_symext::statet> goto_symext::initialize_entry_point_state(
@@ -469,7 +471,9 @@ symbol_tablet goto_symext::symex_from_entry_point_of(
   // Initialize declared shadow memory fields
   state->shadow_memory.fields = fields;
 
-  return symex_with_state(*state, get_goto_function);
+  auto result = symex_with_state(*state, get_goto_function);
+  state.print_trace();
+  return result;
 }
 
 void goto_symext::initialize_path_storage_from_entry_point_of(
@@ -645,9 +649,6 @@ void goto_symext::execute_next_instruction(
       symex_goto(state);
     else
       symex_unreachable_goto(state);
-    printf("Trace: ");
-    for(const auto &i : state.trace) printf("%d", i);
-    printf("\n");
     break;
 
 

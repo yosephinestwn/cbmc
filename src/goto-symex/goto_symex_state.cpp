@@ -50,6 +50,12 @@ goto_symex_statet::goto_symex_statet(
 
 goto_symex_statet::~goto_symex_statet()=default;
 
+void goto_symex_statet::print_trace(){
+  printf("Trace: ");
+  for(const auto &i : state.trace) printf("%d", i);
+  printf("\n");
+}
+
 template <>
 renamedt<ssa_exprt, L0>
 goto_symex_statet::set_indices<L0>(ssa_exprt ssa_expr, const namespacet &ns)
