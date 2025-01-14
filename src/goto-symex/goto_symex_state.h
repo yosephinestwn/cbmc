@@ -28,6 +28,9 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <functional>
 #include <memory>
 
+#include <list>
+
+
 class incremental_dirtyt;
 class symex_target_equationt;
 
@@ -42,6 +45,7 @@ class symex_target_equationt;
 class goto_symex_statet final : public goto_statet
 {
 public:
+  std::list<int> trace;
   goto_symex_statet(
     const symex_targett::sourcet &,
     std::size_t max_field_sensitive_array_size,
@@ -57,6 +61,7 @@ public:
     : goto_symex_statet(other) // NOLINT
   {
     symex_target = target;
+    trace = {};
   }
 
   symex_targett::sourcet source;

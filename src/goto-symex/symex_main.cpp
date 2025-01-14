@@ -645,7 +645,11 @@ void goto_symext::execute_next_instruction(
       symex_goto(state);
     else
       symex_unreachable_goto(state);
+    printf("Trace: ");
+    for(const auto &i : state.trace) printf("%d", i);
+    printf("\n");
     break;
+
 
   case ASSUME:
     if(state.reachable)

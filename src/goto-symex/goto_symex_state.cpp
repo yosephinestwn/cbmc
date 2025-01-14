@@ -25,6 +25,7 @@ Author: Daniel Kroening, kroening@kroening.com
 
 #include "goto_symex_can_forward_propagate.h"
 #include "symex_target_equation.h"
+#include <list>
 
 static void get_l1_name(exprt &expr);
 
@@ -44,6 +45,7 @@ goto_symex_statet::goto_symex_statet(
 {
   threads.emplace_back(guard_manager);
   call_stack().new_frame(source, guardt(true_exprt(), manager));
+  trace = {};
 }
 
 goto_symex_statet::~goto_symex_statet()=default;

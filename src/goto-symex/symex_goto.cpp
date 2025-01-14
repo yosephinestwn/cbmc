@@ -248,6 +248,7 @@ void goto_symext::symex_goto(statet &state)
 
     // next instruction
     symex_transition(state);
+    state.trace.push_back(0);
     return; // nothing to do
   }
 
@@ -295,6 +296,7 @@ void goto_symext::symex_goto(statet &state)
 
       // next instruction
       symex_transition(state);
+      state.trace.push_back(0);
       return;
     }
 
@@ -311,6 +313,7 @@ void goto_symext::symex_goto(statet &state)
 
       // next instruction
       symex_transition(state);
+      state.trace.push_back(0);
       return;
     }
 
@@ -322,6 +325,7 @@ void goto_symext::symex_goto(statet &state)
         should_pause_symex = true;
       }
       symex_transition(state, goto_target, true);
+      state.trace.push_back(1);
       return; // nothing else to do
     }
   }
@@ -342,6 +346,7 @@ void goto_symext::symex_goto(statet &state)
       "Instruction is an unconditional goto with no target: " +
         instruction.code().pretty());
     symex_transition(state, instruction.get_target(), true);
+    state.trace.push_back(1);
     return;
   }
 
@@ -362,6 +367,7 @@ void goto_symext::symex_goto(statet &state)
     if(state_pc==goto_target)
     {
       symex_transition(state, goto_target, false);
+      state.trace.push_back(1);
       return; // nothing else to do
     }
   }
@@ -410,10 +416,12 @@ void goto_symext::symex_goto(statet &state)
     path_storaget::patht next_instruction(target, state);
     next_instruction.state.saved_target = state_pc;
     next_instruction.state.has_saved_next_instruction = true;
+    next_instruction.state.trace.push_back(0);
 
     path_storaget::patht jump_target(target, state);
     jump_target.state.saved_target = new_state_pc;
     jump_target.state.has_saved_jump_target = true;
+    jump_target.state.trace.push_back(1);
     // `forward` tells us where the branch we're _currently_ executing is
     // pointing to; this needs to be inverted for the branch that we're saving,
     // so let its truth value for `backwards` be the same as ours for `forward`.
@@ -452,12 +460,15 @@ void goto_symext::symex_goto(statet &state)
 
     state.guard = guardt(false_exprt(), guard_manager);
     state.reachable = false;
+    state.trace.push_back(1);
   }
   else
   {
     goto_state_list.emplace_back(state.source, state);
 
     symex_transition(state, state_pc, backward);
+
+    state.trace.push_back(1);
 
     if(!symex_config.doing_path_exploration)
     {
