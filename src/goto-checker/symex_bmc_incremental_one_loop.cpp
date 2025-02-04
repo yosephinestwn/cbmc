@@ -126,6 +126,7 @@ bool symex_bmc_incremental_one_loopt::from_entry_point_of(
   const get_goto_functiont &get_goto_function,
   symbol_tablet &new_symbol_table)
 {
+  printf("symex_bmc_incremental_one_loopt::from_entry_point_of is called\n");
   state = initialize_entry_point_state(get_goto_function);
 
   new_symbol_table = symex_with_state(*state, get_goto_function);
@@ -136,6 +137,7 @@ bool symex_bmc_incremental_one_loopt::from_entry_point_of(
 bool symex_bmc_incremental_one_loopt::resume(
   const get_goto_functiont &get_goto_function)
 {
+  printf("symex_bmc_incremental_one_loopt::resume is called\n");
   should_pause_symex = false;
 
   state->symbol_table = symex_with_state(*state, get_goto_function);

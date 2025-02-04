@@ -69,6 +69,7 @@ void output_incremental_status(
 incremental_goto_checkert::resultt single_loop_incremental_symex_checkert::
 operator()(propertiest &properties)
 {
+  printf("Operator () of single_loop_incremental_symex_checkert is used\n");
   resultt result(resultt::progresst::DONE);
 
   std::chrono::duration<double> solver_runtime(0);
