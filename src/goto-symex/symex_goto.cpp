@@ -231,6 +231,7 @@ void goto_symext::symex_goto(statet &state)
 {
   PRECONDITION(state.reachable);
   printf("Symex-goto is called\n");
+  printf("Should pause symex: %d\n", should_pause_symex);
 
   const goto_programt::instructiont &instruction=*state.source.pc;
 
