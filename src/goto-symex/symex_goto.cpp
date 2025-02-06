@@ -29,9 +29,10 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <queue>
 #include <list>
 #include <iostream>
+#include <functional>
 
-std::queue<goto_symex_statet*> trace_stack;
-std::list<goto_symex_statet*> nodes;
+std::queue<std::reference_wrapper<goto_symex_statet>> trace_stack;
+std::list<std::reference_wrapper<goto_symex_statet>> nodes;
 
 void goto_symext::apply_goto_condition(
   goto_symex_statet &current_state,
@@ -571,9 +572,9 @@ void goto_symext::symex_goto(statet &state)
 }
 
 void goto_symext::retrace(std::list<int> trace, bool firstCall){
-  goto_symex_statet* pointer = trace_stack.front();
-  std::queue<goto_symex_statet*> newStack;
-  while (!stack.empty()){
+  goto_symex_statet& pointer = trace_stack.front().get();
+  std::queue<std::reference_wrapper<goto_symex_statet>> newStack;
+  while (!trace_stack.empty()){
     if (firstCall && pointer->trace != trace){ // If the trace does not match, put in new stack
       newStack.push(pointer);
     }
@@ -589,7 +590,7 @@ void goto_symext::retrace(std::list<int> trace, bool firstCall){
       }
     }
     trace_stack.pop();
-    pointer = trace_stack.front();
+    pointer = trace_stack.front().get();
   }
 
   trace_stack = newStack;
