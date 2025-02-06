@@ -589,7 +589,7 @@ void goto_symext::retrace(std::list<int> trace, bool firstCall) {
       nodes.push_front(*pointer);
     }
     else { // If it matches, check if the goto target is the previous node
-      if (!nodes.empty() && (nodes.front().get() == pointer->saved_target)) {
+      if (!nodes.empty() && (nodes.front().get().source.pc->source_location() == pointer->saved_target->source_location())) {
         nodes.push_front(*pointer);
       } else {
         newStack.push(*pointer);
