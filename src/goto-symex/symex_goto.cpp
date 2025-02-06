@@ -258,7 +258,7 @@ void goto_symext::symex_goto(statet &state)
     // next instruction
     symex_transition(state);
     state.trace.push_back(0);
-    trace_stack.push(state);
+    trace_stack.push(std::ref(static_cast<goto_symex_statet&>(state)));
     return; // nothing to do
   }
 
@@ -307,7 +307,7 @@ void goto_symext::symex_goto(statet &state)
       // next instruction
       symex_transition(state);
       state.trace.push_back(0);
-      trace_stack.push(state);
+      trace_stack.push(std::ref(static_cast<goto_symex_statet&>(state)));
       return;
     }
 
@@ -325,7 +325,7 @@ void goto_symext::symex_goto(statet &state)
       // next instruction
       symex_transition(state);
       state.trace.push_back(0);
-      trace_stack.push(state);
+      trace_stack.push(std::ref(static_cast<goto_symex_statet&>(state)));
       return;
     }
 
@@ -338,7 +338,7 @@ void goto_symext::symex_goto(statet &state)
       }
       symex_transition(state, goto_target, true);
       state.trace.push_back(1);
-      trace_stack.push(state);
+      trace_stack.push(std::ref(static_cast<goto_symex_statet&>(state)));
       return; // nothing else to do
     }
   }
@@ -360,7 +360,7 @@ void goto_symext::symex_goto(statet &state)
         instruction.code().pretty());
     symex_transition(state, instruction.get_target(), true);
     state.trace.push_back(1);
-    trace_stack.push(state);
+    trace_stack.push(std::ref(static_cast<goto_symex_statet&>(state)));
     return;
   }
 
@@ -382,7 +382,7 @@ void goto_symext::symex_goto(statet &state)
     {
       symex_transition(state, goto_target, false);
       state.trace.push_back(1);
-      trace_stack.push(state);
+      trace_stack.push(std::ref(static_cast<goto_symex_statet&>(state)));
       return; // nothing else to do
     }
   }
@@ -432,13 +432,13 @@ void goto_symext::symex_goto(statet &state)
     next_instruction.state.saved_target = state_pc;
     next_instruction.state.has_saved_next_instruction = true;
     next_instruction.state.trace.push_back(0);
-    trace_stack.push(next_instruction.state);
+    trace_stack.push(std::ref(static_cast<goto_symex_statet&>(next_instruction.state)));
 
     path_storaget::patht jump_target(target, state);
     jump_target.state.saved_target = new_state_pc;
     jump_target.state.has_saved_jump_target = true;
     jump_target.state.trace.push_back(1);
-    trace_stack.push(jump_target.state);
+    trace_stack.push(std::ref(static_cast<goto_symex_statet&>(jump_target.state)));
     // `forward` tells us where the branch we're _currently_ executing is
     // pointing to; this needs to be inverted for the branch that we're saving,
     // so let its truth value for `backwards` be the same as ours for `forward`.
@@ -478,7 +478,7 @@ void goto_symext::symex_goto(statet &state)
     state.guard = guardt(false_exprt(), guard_manager);
     state.reachable = false;
     state.trace.push_back(1);
-    trace_stack.push(state);
+    trace_stack.push(std::ref(static_cast<goto_symex_statet&>(state)));
   }
   else
   {
@@ -487,7 +487,7 @@ void goto_symext::symex_goto(statet &state)
     symex_transition(state, state_pc, backward);
 
     state.trace.push_back(1);
-    trace_stack.push(state);
+    trace_stack.push(std::ref(static_cast<goto_symex_statet&>(state)));
 
     if(!symex_config.doing_path_exploration)
     {
@@ -571,40 +571,59 @@ void goto_symext::symex_goto(statet &state)
   }
 }
 
-void goto_symext::retrace(std::list<int> trace, bool firstCall){
-  goto_symex_statet& pointer = trace_stack.front().get();
+void goto_symext::retrace(std::list<int> trace, bool firstCall) {
+  // Ensure the stack is not empty before accessing the front element
+  if (trace_stack.empty()) {
+    printf("\nNo traces recorded\n");
+    return;
+  }
+  // Use a raw pointer to the front element
+  goto_symex_statet* pointer = &trace_stack.front().get();
   std::queue<std::reference_wrapper<goto_symex_statet>> newStack;
-  while (!trace_stack.empty()){
-    if (firstCall && pointer.trace != trace){ // If the trace does not match, put in new stack
-      newStack.push(pointer);
+
+  while (!trace_stack.empty()) {
+    if (firstCall && pointer->trace != trace) { // If the trace does not match, put in new stack
+      newStack.push(*pointer);
     }
-    else if (firstCall && pointer.trace == trace) { //Case for the leaf
-      nodes.push_front(pointer);
+    else if (firstCall && pointer->trace == trace) { // Case for the leaf
+      nodes.push_front(*pointer);
     }
-    else{ //If it matches, check if the goto target is the previous node - assume that cbmc --path is used
-      if (!nodes.empty() && (nodes.front() == pointer.saved_target)){
-        nodes.push_front(pointer);
+    else { // If it matches, check if the goto target is the previous node
+      if (!nodes.empty() && (nodes.front().get() == pointer->saved_target)) {
+        nodes.push_front(*pointer);
+      } else {
+        newStack.push(*pointer);
       }
-      else{
-        newStack.push(pointer);
-      }
     }
+
+    // Remove the processed element from the stack
     trace_stack.pop();
-    pointer = trace_stack.front().get();
+
+    // Update the pointer to the next element in the stack
+    if (!trace_stack.empty()) {
+      pointer = &trace_stack.front().get();
+    }
   }
 
+  // Replace the old stack with the new stack
   trace_stack = newStack;
-  if(trace.size() == 1){
-    if (nodes.empty() || nodes.size() == 0) printf("\n There is no path with such traces\n");
-    else{
+
+  // Base case for recursion
+  if (trace.size() == 1) {
+    if (nodes.empty()) {
+      printf("\n There is no path with such traces\n");
+    }
+    else {
       printf("\nThe path that the program takes: \n");
-      for (auto element: nodes){
+      for (auto& element : nodes) {
         std::cout << element.get().source.pc->source_location();
         printf("\n");
       }
     }
     return;
   }
+
+  // Recursive call with a smaller trace
   std::list<int> trace_temp = trace;
   trace_temp.pop_back();
   retrace(trace_temp, false);
