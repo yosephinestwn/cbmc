@@ -28,6 +28,7 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <algorithm>
 #include <queue>
 #include <list>
+#include <iostream>
 
 std::queue<goto_symex_statet*> trace_stack;
 std::list<goto_symex_statet*> nodes;
@@ -597,7 +598,7 @@ void goto_symext::retrace(std::list<int> trace, bool firstCall){
     else{
       printf("\nThe path that the program takes: \n");
       for (auto element: nodes){
-        printf(element->source.pc->source_location());
+        std::cout << element->source.pc->source_location();
         printf("\n");
       }
     }
