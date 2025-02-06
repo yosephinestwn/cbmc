@@ -575,14 +575,14 @@ void goto_symext::retrace(std::list<int> trace, bool firstCall){
   goto_symex_statet& pointer = trace_stack.front().get();
   std::queue<std::reference_wrapper<goto_symex_statet>> newStack;
   while (!trace_stack.empty()){
-    if (firstCall && pointer->trace != trace){ // If the trace does not match, put in new stack
+    if (firstCall && pointer.trace != trace){ // If the trace does not match, put in new stack
       newStack.push(pointer);
     }
-    else if (firstCall && pointer->trace == trace) { //Case for the leaf
+    else if (firstCall && pointer.trace == trace) { //Case for the leaf
       nodes.push_front(pointer);
     }
     else{ //If it matches, check if the goto target is the previous node - assume that cbmc --path is used
-      if (!nodes.empty() && (nodes.front() == pointer->saved_target)){
+      if (!nodes.empty() && (nodes.front() == pointer.saved_target)){
         nodes.push_front(pointer);
       }
       else{
@@ -599,7 +599,7 @@ void goto_symext::retrace(std::list<int> trace, bool firstCall){
     else{
       printf("\nThe path that the program takes: \n");
       for (auto element: nodes){
-        std::cout << element->source.pc->source_location();
+        std::cout << element.get().source.pc->source_location();
         printf("\n");
       }
     }
