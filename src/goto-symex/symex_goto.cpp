@@ -26,6 +26,11 @@ Author: Daniel Kroening, kroening@kroening.com
 #include "path_storage.h"
 
 #include <algorithm>
+#include <queue>
+#include <list>
+
+std::queue<goto_symex_statet*> trace_stack;
+std::list<goto_symex_statet*> nodes;
 
 void goto_symext::apply_goto_condition(
   goto_symex_statet &current_state,
@@ -251,6 +256,7 @@ void goto_symext::symex_goto(statet &state)
     // next instruction
     symex_transition(state);
     state.trace.push_back(0);
+    trace_stack.push(state);
     return; // nothing to do
   }
 
@@ -299,6 +305,7 @@ void goto_symext::symex_goto(statet &state)
       // next instruction
       symex_transition(state);
       state.trace.push_back(0);
+      trace_stack.push(state);
       return;
     }
 
@@ -316,6 +323,7 @@ void goto_symext::symex_goto(statet &state)
       // next instruction
       symex_transition(state);
       state.trace.push_back(0);
+      trace_stack.push(state);
       return;
     }
 
@@ -328,6 +336,7 @@ void goto_symext::symex_goto(statet &state)
       }
       symex_transition(state, goto_target, true);
       state.trace.push_back(1);
+      trace_stack.push(state);
       return; // nothing else to do
     }
   }
@@ -349,6 +358,7 @@ void goto_symext::symex_goto(statet &state)
         instruction.code().pretty());
     symex_transition(state, instruction.get_target(), true);
     state.trace.push_back(1);
+    trace_stack.push(state);
     return;
   }
 
@@ -370,6 +380,7 @@ void goto_symext::symex_goto(statet &state)
     {
       symex_transition(state, goto_target, false);
       state.trace.push_back(1);
+      trace_stack.push(state);
       return; // nothing else to do
     }
   }
@@ -419,11 +430,13 @@ void goto_symext::symex_goto(statet &state)
     next_instruction.state.saved_target = state_pc;
     next_instruction.state.has_saved_next_instruction = true;
     next_instruction.state.trace.push_back(0);
+    trace_stack.push(next_instruction.state);
 
     path_storaget::patht jump_target(target, state);
     jump_target.state.saved_target = new_state_pc;
     jump_target.state.has_saved_jump_target = true;
     jump_target.state.trace.push_back(1);
+    trace_stack.push(jump_target.state);
     // `forward` tells us where the branch we're _currently_ executing is
     // pointing to; this needs to be inverted for the branch that we're saving,
     // so let its truth value for `backwards` be the same as ours for `forward`.
@@ -463,6 +476,7 @@ void goto_symext::symex_goto(statet &state)
     state.guard = guardt(false_exprt(), guard_manager);
     state.reachable = false;
     state.trace.push_back(1);
+    trace_stack.push(state);
   }
   else
   {
@@ -471,6 +485,7 @@ void goto_symext::symex_goto(statet &state)
     symex_transition(state, state_pc, backward);
 
     state.trace.push_back(1);
+    trace_stack.push(state);
 
     if(!symex_config.doing_path_exploration)
     {
@@ -552,6 +567,45 @@ void goto_symext::symex_goto(statet &state)
       }
     }
   }
+}
+
+void goto_symext::retrace(std::list<int> trace, bool firstCall){
+  goto_symex_statet* pointer = trace_stack.front();
+  std::queue<goto_symex_statet*> newStack;
+  while (!stack.empty()){
+    if (firstCall && pointer->trace != trace){ // If the trace does not match, put in new stack
+      newStack.push(pointer);
+    }
+    else if (firstCall && pointer->trace == trace) { //Case for the leaf
+      nodes.push_front(pointer);
+    }
+    else{ //If it matches, check if the goto target is the previous node - assume that cbmc --path is used
+      if (!nodes.empty() && (nodes.front() == pointer->saved_target)){
+        nodes.push_front(pointer);
+      }
+      else{
+        newStack.push(pointer);
+      }
+    }
+    trace_stack.pop();
+    pointer = trace_stack.front();
+  }
+
+  trace_stack = newStack;
+  if(trace.size() == 1){
+    if (nodes.empty() || nodes.size() == 0) printf("\n There is no path with such traces\n");
+    else{
+      printf("\nThe path that the program takes: \n");
+      for (auto element: nodes){
+        printf(element->source.pc->source_location());
+        printf("\n");
+      }
+    }
+    return;
+  }
+  std::list<int> trace_temp = trace;
+  trace_temp.pop_back();
+  retrace(trace_temp, false);
 }
 
 void goto_symext::symex_unreachable_goto(statet &state)

@@ -26,6 +26,7 @@ Author: Daniel Kroening, kroening@kroening.com
 #include "path_storage.h"
 
 #include <memory>
+#include <list>
 
 symex_configt::symex_configt(const optionst &options)
   : max_depth(options.get_unsigned_int_option("depth")),
@@ -395,6 +396,8 @@ symbol_tablet goto_symext::resume_symex_from_saved_state(
   // fresh state, as that would clobber the saved state's program counter
   auto result = symex_with_state(state, get_goto_function);
   state.print_trace();
+  std::list<int> trace = {1,1};
+  retrace(trace, true);
   return result;
 }
 
@@ -475,6 +478,8 @@ symbol_tablet goto_symext::symex_from_entry_point_of(
 
   auto result = symex_with_state(*state, get_goto_function);
   (*state).print_trace();
+  std::list<int> trace = {1,1};
+  retrace(trace, true);
   return result;
 }
 
