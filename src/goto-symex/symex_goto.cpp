@@ -572,6 +572,7 @@ void goto_symext::symex_goto(statet &state)
 }
 
 void goto_symext::retrace(std::list<int> trace, bool firstCall) {
+  bool isFirstCall = true;
   // Check if trace_stack is empty
   if (trace_stack.empty()) {
     std::cout << "There is no paths recorded yet!" << std::endl;
@@ -603,8 +604,10 @@ void goto_symext::retrace(std::list<int> trace, bool firstCall) {
     }
     else if (firstCall && pointer->trace == trace) {
       nodes.push_front(*pointer);
+      isFirstCall = false;
     }
     else {
+      isFirstCall = false;
       if (!nodes.empty() && (nodes.front().get().source.pc->source_location() == pointer->saved_target->source_location())) {
         nodes.push_front(*pointer);
       }
@@ -627,7 +630,7 @@ void goto_symext::retrace(std::list<int> trace, bool firstCall) {
 
   std::cout << "trace_stack looped" << std::endl;
 
-  if (nodes.empty()) {
+  if (nodes.empty() || nodes.size() < 1) {
     std::cout << "There is no path with such traces" << std::endl;
     return;
   }
@@ -644,7 +647,7 @@ void goto_symext::retrace(std::list<int> trace, bool firstCall) {
   // Recursive call with a smaller trace
   std::list<int> trace_temp = trace;
   trace_temp.pop_back();
-  retrace(trace_temp, false);
+  retrace(trace_temp, isFirstCall);
 }
 
 
