@@ -573,20 +573,20 @@ void goto_symext::retrace(std::list<int> trace, bool firstCall) {
   bool isFirstCall = true;
   // Check if trace_stack is empty
   if (trace_stack.empty()) {
-    std::cout << "There is no paths recorded yet!" << std::endl;
+    std::cerr << "There is no paths recorded yet!" << std::endl;
     return;
   }
 
   // Access the front element of trace_stack
   goto_symex_statet* pointer = &trace_stack.front().get();
   if (!pointer) {
-    std::cout << "Error: pointer is null!" << std::endl;
+    std::cerr << "Error: pointer is null!" << std::endl;
     return;
   }
 
   // Check if saved_target is valid
   if (pointer->saved_target == goto_programt::const_targett{}) {
-    std::cout << "Error: saved_target is invalid!" << std::endl;
+    std::cerr << "Error: saved_target is invalid!" << std::endl;
     return;
   }
 
@@ -594,7 +594,7 @@ void goto_symext::retrace(std::list<int> trace, bool firstCall) {
 
   while (!trace_stack.empty()) {
     // Debug logging
-    std::cout << "Processing trace_stack element" << std::endl;
+    std::cout << "Processing all states in storage" << std::endl;
 
     if (firstCall && pointer->trace != trace) {
       newStack.push(*pointer);
