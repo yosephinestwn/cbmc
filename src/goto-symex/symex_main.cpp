@@ -395,11 +395,7 @@ symbol_tablet goto_symext::resume_symex_from_saved_state(
   auto result = symex_with_state(state, get_goto_function);
   state.print_trace();
   std::list<int> trace = {1,1};
-  printf("\nTrace target: ");
-  for (auto& element : trace) {
-    printf("%d", element);
-  }
-  printf(" \n");
+  printf("\nTrace target: 11");
   retrace(trace, true);
   return result;
 }
@@ -482,11 +478,7 @@ symbol_tablet goto_symext::symex_from_entry_point_of(
   auto result = symex_with_state(*state, get_goto_function);
   (*state).print_trace();
   std::list<int> trace = {1,1};
-  printf("\nTrace target: ");
-  for (auto& element : trace) {
-    printf("%d", element);
-  }
-  printf(" \n");
+  printf("\nTrace target: 11");
   retrace(trace, true);
   return result;
 }
