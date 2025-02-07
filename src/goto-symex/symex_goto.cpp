@@ -595,6 +595,10 @@ void goto_symext::retrace(std::list<int> trace, bool firstCall) {
   std::queue<std::reference_wrapper<goto_symex_statet>> newStack;
 
   while (!trace_stack.empty()) {
+    // Debug logging
+    std::cout << "Processing trace_stack element" << std::endl;
+    std::cout << "Trace stack size: "<< trace_stack.size() << std::endl;
+
     if (firstCall && pointer->trace != trace) {
       newStack.push(*pointer);
     }
@@ -624,14 +628,17 @@ void goto_symext::retrace(std::list<int> trace, bool firstCall) {
   // Replace the old stack with the new stack
   trace_stack = newStack;
 
+  std::cout << "trace_stack looped" << std::endl;
+  std::cout << "nodes size: "<< nodes.size() << std::endl;
+
   if (nodes.empty() || nodes.size() < 1) {
-    std::cout << "\nThere is no path with such traces" << std::endl;
+    std::cout << "There is no path with such traces" << std::endl;
     return;
   }
 
   // Base case for recursion
   if (trace.size() <= 1) {
-    std::cout << "\nThe path that the program takes:" << std::endl;
+    std::cout << "The path that the program takes:" << std::endl;
     for (auto& element : nodes) {
       std::cout << element.get().source.pc->source_location() << std::endl;
     }

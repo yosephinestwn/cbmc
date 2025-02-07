@@ -300,6 +300,7 @@ switch_to_thread(goto_symex_statet &state, const unsigned int thread_nb)
 void goto_symext::symex_threaded_step(
   statet &state, const get_goto_functiont &get_goto_function)
 {
+  printf("goto_symext::symex_threaded_step is called\n");
   symex_step(get_goto_function, state);
 
   _total_vccs = state.total_vccs;
@@ -325,6 +326,7 @@ symbol_tablet goto_symext::symex_with_state(
   statet &state,
   const get_goto_functiont &get_goto_function)
 {
+  printf("goto_symext::symex_with_state is called\n");
   // resets the namespace to only wrap a single symbol table, and does so upon
   // destruction of an object of this type; instantiating the type is thus all
   // that's needed to achieve a reset upon exiting this method
@@ -395,7 +397,7 @@ symbol_tablet goto_symext::resume_symex_from_saved_state(
   auto result = symex_with_state(state, get_goto_function);
   state.print_trace();
   std::list<int> trace = {1,1};
-  printf("\nTrace target: 11");
+  printf("Trace target: 11\n");
   retrace(trace, true);
   return result;
 }
@@ -478,7 +480,7 @@ symbol_tablet goto_symext::symex_from_entry_point_of(
   auto result = symex_with_state(*state, get_goto_function);
   (*state).print_trace();
   std::list<int> trace = {1,1};
-  printf("\nTrace target: 11");
+  printf("Trace target: 11\n");
   retrace(trace, true);
   return result;
 }
