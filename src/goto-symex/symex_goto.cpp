@@ -604,7 +604,7 @@ void goto_symext::retrace(std::list<int> trace, bool firstCall) {
       nodes.push_front(*pointer);
     }
     else {
-      if (!nodes.empty() && (nodes.front().get().source.pc->source_location() == *pointer->saved_target->source_location())) {
+      if (!nodes.empty() && (nodes.front().get().source.pc->source_location() == pointer->saved_target->source_location()) {
         nodes.push_front(*pointer);
       }
       else {
