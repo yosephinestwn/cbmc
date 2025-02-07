@@ -625,16 +625,16 @@ void goto_symext::retrace(std::list<int> trace, bool firstCall) {
   // Replace the old stack with the new stack
   trace_stack = newStack;
 
+  if (nodes.empty()) {
+    std::cout << "There is no path with such traces" << std::endl;
+    return;
+  }
+
   // Base case for recursion
-  if (trace.size() == 1) {
-    if (nodes.empty()) {
-      std::cout << "There is no path with such traces" << std::endl;
-    }
-    else {
-      std::cout << "The path that the program takes:" << std::endl;
-      for (auto& element : nodes) {
-        std::cout << element.get().source.pc->source_location() << std::endl;
-      }
+  if (trace.size() <= 1) {
+    std::cout << "The path that the program takes:" << std::endl;
+    for (auto& element : nodes) {
+      std::cout << element.get().source.pc->source_location() << std::endl;
     }
     return;
   }
