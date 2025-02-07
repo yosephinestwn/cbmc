@@ -593,6 +593,9 @@ void goto_symext::retrace(std::list<int> trace, bool firstCall) {
   std::queue<std::reference_wrapper<goto_symex_statet>> newStack;
 
   while (!trace_stack.empty()) {
+    // Debug logging
+    std::cout << "Processing trace_stack element" << std::endl;
+    std::cout << "Trace stack size: "<< trace_stack.size() << std::endl;
 
     if (firstCall && pointer->trace != trace) {
       newStack.push(*pointer);
