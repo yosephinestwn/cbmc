@@ -625,6 +625,8 @@ void goto_symext::retrace(std::list<int> trace, bool firstCall) {
   // Replace the old stack with the new stack
   trace_stack = newStack;
 
+  std::cout << "trace_stack looped" << std::endl;
+
   if (nodes.empty()) {
     std::cout << "There is no path with such traces" << std::endl;
     return;
