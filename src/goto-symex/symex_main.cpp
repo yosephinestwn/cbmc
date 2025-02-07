@@ -399,7 +399,7 @@ symbol_tablet goto_symext::resume_symex_from_saved_state(
   for (auto& element : trace) {
     printf("%d", element);
   }
-  printf("\n");
+
   retrace(trace, true);
   return result;
 }
