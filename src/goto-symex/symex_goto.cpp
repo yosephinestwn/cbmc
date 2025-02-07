@@ -629,6 +629,7 @@ void goto_symext::retrace(std::list<int> trace, bool firstCall) {
   trace_stack = newStack;
 
   std::cout << "trace_stack looped" << std::endl;
+  std::cout << "nodes size: "<< nodes.size() << std::endl;
 
   if (nodes.empty() || nodes.size() < 1) {
     std::cout << "There is no path with such traces" << std::endl;
@@ -641,6 +642,7 @@ void goto_symext::retrace(std::list<int> trace, bool firstCall) {
     for (auto& element : nodes) {
       std::cout << element.get().source.pc->source_location() << std::endl;
     }
+    nodes.clear(); //Clear the nodes storage for the next function call
     return;
   }
 
