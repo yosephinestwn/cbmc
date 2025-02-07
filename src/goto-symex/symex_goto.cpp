@@ -572,24 +572,42 @@ void goto_symext::symex_goto(statet &state)
 }
 
 void goto_symext::retrace(std::list<int> trace, bool firstCall) {
-  // Ensure the stack is not empty before accessing the front element
+  // Debug logging
+  std::cerr << "Entering retrace function" << std::endl;
+  std::cerr << "trace_stack size: " << trace_stack.size() << std::endl;
+  std::cerr << "nodes size: " << nodes.size() << std::endl;
+
+  // Check if trace_stack is empty
   if (trace_stack.empty()) {
-    printf("\nNo traces recorded\n");
+    std::cerr << "Error: trace_stack is empty!" << std::endl;
     return;
   }
-  // Use a raw pointer to the front element
+
+  // Access the front element of trace_stack
   goto_symex_statet* pointer = &trace_stack.front().get();
+  if (!pointer) {
+    std::cerr << "Error: pointer is null!" << std::endl;
+    return;
+  }
+
+  // Check if saved_target is valid
+  if (pointer->saved_target == goto_programt::const_targett{}) {
+    std::cerr << "Error: saved_target is invalid!" << std::endl;
+    return;
+  }
+
   std::queue<std::reference_wrapper<goto_symex_statet>> newStack;
 
   while (!trace_stack.empty()) {
-    if (firstCall && pointer->trace != trace) { // If the trace does not match, put in new stack
+    // Debug logging
+    std::cerr << "Processing trace_stack element" << std::endl;
+
+    if (firstCall && pointer->trace != trace) {
       newStack.push(*pointer);
-    }
-    else if (firstCall && pointer->trace == trace) { // Case for the leaf
+    } else if (firstCall && pointer->trace == trace) {
       nodes.push_front(*pointer);
-    }
-    else { // If it matches, check if the goto target is the previous node
-      if (!nodes.empty() && (nodes.front().get().source.pc->source_location() == pointer->saved_target->source_location())) {
+    } else {
+      if (!nodes.empty() && (nodes.front().get() == *pointer->saved_target)) {
         nodes.push_front(*pointer);
       } else {
         newStack.push(*pointer);
@@ -611,17 +629,21 @@ void goto_symext::retrace(std::list<int> trace, bool firstCall) {
   // Base case for recursion
   if (trace.size() == 1) {
     if (nodes.empty()) {
-      printf("\n There is no path with such traces\n");
-    }
-    else {
-      printf("\nThe path that the program takes: \n");
+      std::cerr << "There is no path with such traces" << std::endl;
+    } else {
+      std::cerr << "The path that the program takes:" << std::endl;
       for (auto& element : nodes) {
-        std::cout << element.get().source.pc->source_location();
-        printf("\n");
+        std::cout << element.get().source.pc->source_location() << std::endl;
       }
     }
     return;
   }
+
+  // Recursive call with a smaller trace
+  std::list<int> trace_temp = trace;
+  trace_temp.pop_back();
+  retrace(trace_temp, false);
+}
 
   // Recursive call with a smaller trace
   std::list<int> trace_temp = trace;
