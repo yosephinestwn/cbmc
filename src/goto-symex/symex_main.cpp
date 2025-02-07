@@ -300,7 +300,6 @@ switch_to_thread(goto_symex_statet &state, const unsigned int thread_nb)
 void goto_symext::symex_threaded_step(
   statet &state, const get_goto_functiont &get_goto_function)
 {
-  printf("goto_symext::symex_threaded_step is called\n");
   symex_step(get_goto_function, state);
 
   _total_vccs = state.total_vccs;
@@ -326,7 +325,6 @@ symbol_tablet goto_symext::symex_with_state(
   statet &state,
   const get_goto_functiont &get_goto_function)
 {
-  printf("goto_symext::symex_with_state is called\n");
   // resets the namespace to only wrap a single symbol table, and does so upon
   // destruction of an object of this type; instantiating the type is thus all
   // that's needed to achieve a reset upon exiting this method
