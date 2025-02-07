@@ -572,27 +572,22 @@ void goto_symext::symex_goto(statet &state)
 }
 
 void goto_symext::retrace(std::list<int> trace, bool firstCall) {
-  // Debug logging
-  std::cerr << "Entering retrace function" << std::endl;
-  std::cerr << "trace_stack size: " << trace_stack.size() << std::endl;
-  std::cerr << "nodes size: " << nodes.size() << std::endl;
-
   // Check if trace_stack is empty
   if (trace_stack.empty()) {
-    std::cerr << "Error: trace_stack is empty!" << std::endl;
+    std::cout << "There is no paths recorded yet!" << std::endl;
     return;
   }
 
   // Access the front element of trace_stack
   goto_symex_statet* pointer = &trace_stack.front().get();
   if (!pointer) {
-    std::cerr << "Error: pointer is null!" << std::endl;
+    std::cout << "Error: pointer is null!" << std::endl;
     return;
   }
 
   // Check if saved_target is valid
   if (pointer->saved_target == goto_programt::const_targett{}) {
-    std::cerr << "Error: saved_target is invalid!" << std::endl;
+    std::cout << "Error: saved_target is invalid!" << std::endl;
     return;
   }
 
@@ -600,16 +595,19 @@ void goto_symext::retrace(std::list<int> trace, bool firstCall) {
 
   while (!trace_stack.empty()) {
     // Debug logging
-    std::cerr << "Processing trace_stack element" << std::endl;
+    std::cout << "Processing trace_stack element" << std::endl;
 
     if (firstCall && pointer->trace != trace) {
       newStack.push(*pointer);
-    } else if (firstCall && pointer->trace == trace) {
+    }
+    else if (firstCall && pointer->trace == trace) {
       nodes.push_front(*pointer);
-    } else {
+    }
+    else {
       if (!nodes.empty() && (nodes.front().get() == *pointer->saved_target)) {
         nodes.push_front(*pointer);
-      } else {
+      }
+      else {
         newStack.push(*pointer);
       }
     }
@@ -629,9 +627,10 @@ void goto_symext::retrace(std::list<int> trace, bool firstCall) {
   // Base case for recursion
   if (trace.size() == 1) {
     if (nodes.empty()) {
-      std::cerr << "There is no path with such traces" << std::endl;
-    } else {
-      std::cerr << "The path that the program takes:" << std::endl;
+      std::cout << "There is no path with such traces" << std::endl;
+    }
+    else {
+      std::cout << "The path that the program takes:" << std::endl;
       for (auto& element : nodes) {
         std::cout << element.get().source.pc->source_location() << std::endl;
       }
