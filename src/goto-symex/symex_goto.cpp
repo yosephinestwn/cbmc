@@ -644,11 +644,6 @@ void goto_symext::retrace(std::list<int> trace, bool firstCall) {
   retrace(trace_temp, false);
 }
 
-  // Recursive call with a smaller trace
-  std::list<int> trace_temp = trace;
-  trace_temp.pop_back();
-  retrace(trace_temp, false);
-}
 
 void goto_symext::symex_unreachable_goto(statet &state)
 {
