@@ -233,7 +233,7 @@ renamedt<exprt, L2> try_evaluate_pointer_comparisons(
 
   return condition;
 }
-void symex_goto_retrace(statet &state, std::list<int> trace, int trace_index){
+void goto_symext::symex_goto_retrace(statet &state, std::list<int> trace, int trace_index){
   const goto_programt::instructiont &instruction=*state.source.pc;
 
   exprt new_guard = clean_expr(instruction.condition(), state, false);
