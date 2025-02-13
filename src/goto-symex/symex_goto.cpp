@@ -233,6 +233,97 @@ renamedt<exprt, L2> try_evaluate_pointer_comparisons(
 
   return condition;
 }
+void symex_goto_retrace(statet &state, std::list<int> trace, int trace_index){
+  const goto_programt::instructiont &instruction=*state.source.pc;
+
+  exprt new_guard = clean_expr(instruction.condition(), state, false);
+
+  renamedt<exprt, L2> renamed_guard = state.rename(std::move(new_guard), ns);
+  renamed_guard = try_evaluate_pointer_comparisons(
+    std::move(renamed_guard), state.value_set, language_mode, ns);
+
+  new_guard = renamed_guard.get();
+
+  target.goto_instruction(state.guard.as_expr(), renamed_guard, state.source);
+
+  DATA_INVARIANT(
+    !instruction.targets.empty(), "goto should have at least one target");
+
+  // we only do deterministic gotos for now
+  DATA_INVARIANT(
+    instruction.targets.size() == 1, "no support for non-deterministic gotos");
+
+  goto_programt::const_targett goto_target=
+    instruction.get_target();
+
+  const bool backward = instruction.is_backwards_goto();
+
+  goto_programt::const_targett new_state_pc;
+
+  if(trace[trace_index] == 1){
+    new_state_pc=goto_target;
+  } else {
+    new_state_pc = state.source.pc;
+    new_state_pc++;
+  }
+
+  symex_transition(state, new_state_pc, backward);
+
+  // produce new guard symbol
+  exprt guard_expr;
+
+  if(
+    new_guard.id() == ID_symbol ||
+    (new_guard.id() == ID_not &&
+     to_not_expr(new_guard).op().id() == ID_symbol))
+  {
+    guard_expr=new_guard;
+  }
+  else
+  {
+    symbol_exprt guard_symbol_expr =
+      symbol_exprt(statet::guard_identifier(), bool_typet());
+    exprt new_rhs = boolean_negate(new_guard);
+
+    ssa_exprt new_lhs =
+      state.rename_ssa<L1>(ssa_exprt{guard_symbol_expr}, ns).get();
+    new_lhs =
+      state.assignment(std::move(new_lhs), new_rhs, ns, true, false).get();
+
+    guardt guard{true_exprt{}, guard_manager};
+
+    log.conditional_output(
+      log.debug(),
+      [this, &new_lhs](messaget::mstreamt &mstream) {
+        mstream << "Assignment to " << new_lhs.get_identifier()
+                << " [" << pointer_offset_bits(new_lhs.type(), ns).value_or(0) << " bits]"
+                << messaget::eom;
+      });
+
+    target.assignment(
+      guard.as_expr(),
+      new_lhs, new_lhs, guard_symbol_expr,
+      new_rhs,
+      original_source,
+      symex_targett::assignment_typet::GUARD);
+
+    guard_expr = state.rename(boolean_negate(guard_symbol_expr), ns).get();
+  }
+
+  if(trace[trace_index] == 1)
+  {
+    state.guard.add(guard_expr);
+    log.debug() << "Following jump target"
+                << log.eom;
+  } else {
+    state.guard.add(boolean_negate(guard_expr));
+    log.debug() << "Following next instruction"
+                << log.eom;
+  }
+
+  return;
+}
+
 
 void goto_symext::symex_goto(statet &state)
 {
@@ -569,8 +660,9 @@ void goto_symext::symex_goto(statet &state)
   }
 }
 
-void goto_symext::retrace(std::list<int> trace, bool firstCall) {
+/*void goto_symext::retrace(std::list<int> trace, bool firstCall) {
   bool isFirstCall = true;
+  auto sizeBefore = trace_stack.size();
   // Check if trace_stack is empty
   if (trace_stack.empty()) {
     std::cerr << "There is no paths recorded yet!" << std::endl;
@@ -622,13 +714,14 @@ void goto_symext::retrace(std::list<int> trace, bool firstCall) {
     }
   }
 
-  // Replace the old stack with the new stack
-  trace_stack = newStack;
-
-  if (nodes.empty() || nodes.size() < 1) {
+  // Stop the retracing if there is no matching path
+  if (nodes.empty() || nodes.size() < 1 || sizeBefore == newStack.size()) {
     std::cout << "There is no path with such traces" << std::endl;
     return;
   }
+
+  // Replace the old stack with the new stack
+  trace_stack = newStack;
 
   // Base case for recursion
   if (trace.size() <= 1) {
@@ -644,7 +737,7 @@ void goto_symext::retrace(std::list<int> trace, bool firstCall) {
   std::list<int> trace_temp = trace;
   trace_temp.pop_back();
   retrace(trace_temp, isFirstCall);
-}
+}*/
 
 
 void goto_symext::symex_unreachable_goto(statet &state)
