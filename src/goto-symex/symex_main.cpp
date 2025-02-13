@@ -396,7 +396,7 @@ symbol_tablet goto_symext::resume_symex_from_saved_state(
   state.print_trace();
   std::list<int> trace = {1,1};
   printf("Trace target: 11\n");
-  retrace(trace, true);
+  //retrace(trace, true);
   return result;
 }
 
@@ -479,7 +479,7 @@ symbol_tablet goto_symext::symex_from_entry_point_of(
   (*state).print_trace();
   std::list<int> trace = {1,1};
   printf("Trace target: 11\n");
-  retrace(trace, true);
+  //retrace(trace, true);
   return result;
 }
 

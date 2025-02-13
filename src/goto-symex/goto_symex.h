@@ -315,10 +315,8 @@ protected:
   /// Symbolically execute a GOTO instruction
   /// \param state: Symbolic execution state for current instruction
   virtual void symex_goto(statet &state);
-  /// Retrace one path based on the input "trace"
-  /// \param trace:
-  /// \param firstCall:
-  void retrace(std::list<int> trace, bool firstCall);
+
+  //void retrace(std::list<int> trace, bool firstCall);
   /// Symbolically execute a GOTO instruction in the context of unreachable code
   /// \param state: Symbolic execution state for current instruction
   void symex_unreachable_goto(statet &state);
