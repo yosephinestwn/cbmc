@@ -205,9 +205,9 @@ void cmdlinet::parse_optstring(const char *optstring)
       option.hasval = false;
 
     options.push_back(option);
-    std::cout << "option pushed: " << option << std::endl();
+    std::cout << "option pushed: " << optstring << std::endl();
   }
-  std::cout << "option not pushed: " << option << std::endl();
+  std::cout << "option not pushed: " << optstring << std::endl();
 }
 
 std::vector<std::string>
