@@ -656,9 +656,14 @@ void goto_symext::execute_next_instruction(
     if(state.reachable)
     {
      if (symex_config.doing_path_exploration)
+     {
        symex_goto_retrace(state, symex_config.trace_target, 0);
+     }
      else
+     {
+       printf("No path explore\n");
        symex_goto(state);
+     }
     }
     else
       symex_unreachable_goto(state);
