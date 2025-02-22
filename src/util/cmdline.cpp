@@ -12,7 +12,6 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <util/exception_utils.h>
 #include <util/invariant.h>
 #include <util/string_utils.h>
-#include <iostream>
 
 cmdlinet::cmdlinet()
 {
@@ -144,7 +143,6 @@ std::optional<std::size_t> cmdlinet::getoptnr(char option) const
 
 std::optional<std::size_t> cmdlinet::getoptnr(const std::string &option) const
 {
-  printf("get option number based on string\n");
   for(std::size_t i=0; i<options.size(); i++)
     if(options[i].optstring==option)
       return i;
@@ -205,9 +203,7 @@ void cmdlinet::parse_optstring(const char *optstring)
       option.hasval = false;
 
     options.push_back(option);
-    std::cout << "option pushed: " << optstring << std::endl;
   }
-  std::cout << "option not pushed: " << optstring << std::endl;
 }
 
 std::vector<std::string>
@@ -282,10 +278,8 @@ bool cmdlinet::parse_arguments(int argc, const char **argv)
 
       if(argv[i][1] != 0 && argv[i][2] == 0)
         optnr = getoptnr(argv[i][1]); // single-letter option -X
-      else if(argv[i][1] == '-'){
-        printf("multi-letter option with --XXX\n");
+      else if(argv[i][1] == '-')
         optnr = getoptnr(argv[i] + 2); // multi-letter option with --XXX
-      }
       else
       {
         // Multi-letter option -XXX, or single-letter with argument -Xval
@@ -293,15 +287,11 @@ bool cmdlinet::parse_arguments(int argc, const char **argv)
         optnr = getoptnr(argv[i][1]);
 
         if(!optnr.has_value()) // try multi-letter
-        {
-          printf("multi-letter option with --XXX with value\n");
           optnr = getoptnr(argv[i] + 1);
-        }
       }
 
       if(!optnr.has_value())
       {
-        printf("Unknown argument\n");
         unknown_arg = argv[i];
         return true;
       }

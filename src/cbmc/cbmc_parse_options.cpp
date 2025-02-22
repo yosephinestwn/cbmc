@@ -170,7 +170,6 @@ void cbmc_parse_optionst::get_command_line_options(optionst &options)
 
   if (cmdline.isset("retrace"))
   {
-    printf("retrace is set\n");
     options.set_option("retrace", cmdline.get_value("retrace"));
     if (!cmdline.isset("paths")){
       log.error()
