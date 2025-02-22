@@ -66,8 +66,9 @@ bool optionst::is_set(const std::string &option) const
   return option_map.find(option) != option_map.end();
 }
 
-std::vector<int> optionst::is_set_retrace() const
+std::vector<int> optionst::is_set_retrace(bool doing_path_exploration) const
 {
+  if(!doing_path_exploration) return std::vector<int>();
   auto value_list = option_map.at("retrace");
   if (value_list.empty() || value_list.size() == 0)
   {
