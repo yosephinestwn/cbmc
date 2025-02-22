@@ -12,6 +12,7 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <util/exception_utils.h>
 #include <util/invariant.h>
 #include <util/string_utils.h>
+#include <iostream>
 
 cmdlinet::cmdlinet()
 {
@@ -204,9 +205,9 @@ void cmdlinet::parse_optstring(const char *optstring)
       option.hasval = false;
 
     options.push_back(option);
-    printf("option pushed\n");
+    std::cout << "option pushed: " << option << std::endl();
   }
-  printf("option not pushed\n");
+  std::cout << "option not pushed: " << option << std::endl();
 }
 
 std::vector<std::string>
