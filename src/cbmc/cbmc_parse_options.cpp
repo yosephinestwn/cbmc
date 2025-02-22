@@ -168,18 +168,15 @@ void cbmc_parse_optionst::get_command_line_options(optionst &options)
     exit(CPROVER_EXIT_USAGE_ERROR);
   }
 
-  if (cmdline.isset("retrace") && !cmdline.isset("paths"))
+  if (cmdline.isset("retrace"))
   {
-    log.error()
-      << "--retrace and --paths should be given together"
-      << messaget::eom;
-    exit(CPROVER_EXIT_USAGE_ERROR);
-  }
-  else
-  {
-    if (cmdline.isset("retrace") && cmdline.isset("paths"))
-    {
-      options.set_option("retrace", cmdline.get_value("retrace"));
+    printf("retrace is set\n");
+    options.set_option("retrace", cmdline.get_value("retrace"));
+    if (!cmdline.isset("paths")){
+      log.error()
+        << "--retrace and --paths should be given together"
+        << messaget::eom;
+      exit(CPROVER_EXIT_USAGE_ERROR);
     }
   }
 
