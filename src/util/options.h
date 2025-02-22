@@ -15,6 +15,7 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <string>
 #include <map>
 #include <list>
+#include <vector>
 
 class json_objectt;
 class xmlt;
@@ -33,6 +34,7 @@ public:
 
   /// N.B. opts.is_set("foo") does not imply opts.get_bool_option("foo")
   bool is_set(const std::string &option) const;
+  std::vector<int> is_set_retrace() const;
 
   void set_option(const std::string &option, const bool value);
   void set_option(const std::string &option, const int value);

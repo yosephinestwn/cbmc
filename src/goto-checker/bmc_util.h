@@ -194,7 +194,9 @@ void run_property_decider(
   "(ignore-properties-before-unwind-min)"                                      \
   "(symex-cache-dereferences)" OPT_UNWINDSET
 
-#define HELP_BMC                                                               \
+#define HELP_BMC \
+  " {y--retrace} [target trace] \t "                                           \
+  "run a retrospective verification on a single path\n"                        \
   " {y--paths} [strategy] \t explore paths one at a time\n"                    \
   " {y--show-symex-strategies} \t list strategies for use with {y--paths}\n"   \
   " {y--show-goto-symex-steps} \t show which steps symex travels, includes "   \

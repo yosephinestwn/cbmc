@@ -168,6 +168,21 @@ void cbmc_parse_optionst::get_command_line_options(optionst &options)
     exit(CPROVER_EXIT_USAGE_ERROR);
   }
 
+  if (cmdline.isset("retrace") && !cmdline.isset("paths"))
+  {
+    log.error()
+      << "--retrace and --paths should be given together"
+      << messaget::eom;
+    exit(CPROVER_EXIT_USAGE_ERROR);
+  }
+  else
+  {
+    if (cmdline.isset("retrace") && cmdline.isset("paths"))
+    {
+      options.set_option("retrace", cmdline.get_value("retrace"));
+    }
+  }
+
   // We want to warn the user that if we are using standard checks (that enables
   // unwinding-assertions) and we did not disable them manually.
   if(

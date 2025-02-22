@@ -64,6 +64,41 @@ bool optionst::is_set(const std::string &option) const
   return option_map.find(option) != option_map.end();
 }
 
+std::vector<int> optionst::is_set_retrace() const
+{
+  auto value_list = option_map.at("retrace");
+  if (value_list.empty() || value_list == NULL || value_list.size() == 0)
+  {
+    log.error()
+      << "no input is given"
+      << messaget::eom;
+    exit(CPROVER_EXIT_USAGE_ERROR);
+  }
+  auto trace_target = value_list.front();
+  if(trace_target.empty() || trace_target == NULL || trace_target.length() == 0)
+  {
+    log.error()
+      << "target trace is empty"
+      << messaget::eom;
+    exit(CPROVER_EXIT_USAGE_ERROR);
+  }
+  std::vector<int> trace;
+  for(char& c : trace_target) {
+    if (c == '0' || c == '1')
+    {
+      trace.push_back(c - '0');
+    }
+    else
+    {
+      log.error()
+        << "target trace is not correctly written, please only use '0' and '1'"
+        << messaget::eom;
+      exit(CPROVER_EXIT_USAGE_ERROR);
+    }
+  }
+  return trace;
+}
+
 const std::string optionst::get_option(const std::string &option) const
 {
   option_mapt::const_iterator it=

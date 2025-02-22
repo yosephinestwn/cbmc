@@ -8,6 +8,7 @@ Author: Daniel Kroening, kroening@kroening.com
 
 /// \file
 /// Symbolic Execution
+#include <vector>
 
 #ifndef CPROVER_GOTO_SYMEX_SYMEX_CONFIG_H
 #define CPROVER_GOTO_SYMEX_SYMEX_CONFIG_H
@@ -23,6 +24,8 @@ struct symex_configt final
   unsigned max_depth;
 
   bool doing_path_exploration;
+
+  std::vector<int> trace_target;
 
   bool allow_pointer_unsoundness;
 
