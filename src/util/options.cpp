@@ -69,13 +69,13 @@ bool optionst::is_set(const std::string &option) const
 std::vector<int> optionst::is_set_retrace() const
 {
   auto value_list = option_map.at("retrace");
-  if (value_list.empty() || value_list == NULL || value_list.size() == 0)
+  if (value_list.empty() || value_list.size() == 0)
   {
     std::cerr << "No input is given!" << '\n';
     exit(CPROVER_EXIT_USAGE_ERROR);
   }
   auto trace_target = value_list.front();
-  if(trace_target.empty() || trace_target == NULL || trace_target.length() == 0)
+  if(trace_target.empty() || trace_target.length() == 0)
   {
     std::cerr << "Target trace is empty!" << '\n';
     exit(CPROVER_EXIT_USAGE_ERROR);
