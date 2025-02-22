@@ -10,6 +10,7 @@ Author: Daniel Kroening, kroening@kroening.com
 /// Options
 
 #include "options.h"
+#include <util/exit_codes.h>
 
 #include "constructor_of.h"
 #include "json.h"
@@ -69,17 +70,13 @@ std::vector<int> optionst::is_set_retrace() const
   auto value_list = option_map.at("retrace");
   if (value_list.empty() || value_list == NULL || value_list.size() == 0)
   {
-    log.error()
-      << "no input is given"
-      << messaget::eom;
+    std::cerr << "No input is given!" << '\n';
     exit(CPROVER_EXIT_USAGE_ERROR);
   }
   auto trace_target = value_list.front();
   if(trace_target.empty() || trace_target == NULL || trace_target.length() == 0)
   {
-    log.error()
-      << "target trace is empty"
-      << messaget::eom;
+    std::cerr << "Target trace is empty!" << '\n';
     exit(CPROVER_EXIT_USAGE_ERROR);
   }
   std::vector<int> trace;
@@ -90,9 +87,7 @@ std::vector<int> optionst::is_set_retrace() const
     }
     else
     {
-      log.error()
-        << "target trace is not correctly written, please only use '0' and '1'"
-        << messaget::eom;
+      std::cerr << "Target trace is not correctly written, please only use '0' and '1'!" << '\n';
       exit(CPROVER_EXIT_USAGE_ERROR);
     }
   }
