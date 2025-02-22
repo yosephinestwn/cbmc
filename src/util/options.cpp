@@ -11,6 +11,7 @@ Author: Daniel Kroening, kroening@kroening.com
 
 #include "options.h"
 #include <util/exit_codes.h>
+#include <iostream>
 
 #include "constructor_of.h"
 #include "json.h"
