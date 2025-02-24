@@ -235,6 +235,12 @@ renamedt<exprt, L2> try_evaluate_pointer_comparisons(
 }
 void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace, int trace_index){
   printf("\n symex_goto_retrace is called\n");
+  if(trace_index >= trace.size()){
+    state.reachable = false;
+    return;
+  }
+
+  PRECONDITION(state.reachable);
   const goto_programt::instructiont &instruction=*state.source.pc;
 
   exprt new_guard = clean_expr(instruction.condition(), state, false);
@@ -322,7 +328,6 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace, int 
     log.debug() << "Following next instruction"
                 << log.eom;
   }
-
   return;
 }
 
