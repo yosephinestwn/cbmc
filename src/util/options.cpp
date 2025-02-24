@@ -68,7 +68,10 @@ bool optionst::is_set(const std::string &option) const
 
 std::vector<int> optionst::is_set_retrace(bool doing_path_exploration) const
 {
-  if(!doing_path_exploration) return std::vector<int>();
+  if(!doing_path_exploration) {
+    std::cerr << "The option '--paths' should be used together with '--retrace'!" << '\n';
+    exit(CPROVER_EXIT_USAGE_ERROR);
+  }
   auto value_list = option_map.at("retrace");
   if (value_list.empty() || value_list.size() == 0)
   {
