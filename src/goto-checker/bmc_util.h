@@ -183,6 +183,7 @@ void run_property_decider(
   "(paths):"                                                                   \
   "(show-symex-strategies)"                                                    \
   "(depth):"                                                                   \
+  "(retrace):"                                                                             \
   "(max-field-sensitivity-array-size):"                                        \
   "(no-array-field-sensitivity)"                                               \
   "(graphml-witness):"                                                         \
