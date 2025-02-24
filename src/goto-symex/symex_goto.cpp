@@ -235,7 +235,7 @@ renamedt<exprt, L2> try_evaluate_pointer_comparisons(
 }
 void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace, int trace_index){
   printf("\n symex_goto_retrace is called\n");
-  if(trace_index >= trace.size()){
+  if(trace_index >= static_cast<int>(trace.size())){
     state.reachable = false;
     return;
   }
