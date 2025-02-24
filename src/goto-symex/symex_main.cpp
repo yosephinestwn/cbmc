@@ -657,7 +657,7 @@ void goto_symext::execute_next_instruction(
     {
      if (symex_config.doing_path_exploration)
      {
-       symex_goto_retrace(state, symex_config.trace_target, 0);
+       symex_goto_retrace(state, symex_config.trace_target);
      }
      else
      {

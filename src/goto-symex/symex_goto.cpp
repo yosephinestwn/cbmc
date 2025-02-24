@@ -33,6 +33,7 @@ Author: Daniel Kroening, kroening@kroening.com
 
 std::queue<std::reference_wrapper<goto_symex_statet>> trace_stack;
 std::list<std::reference_wrapper<goto_symex_statet>> nodes;
+int trace_index;
 
 void goto_symext::apply_goto_condition(
   goto_symex_statet &current_state,
@@ -233,7 +234,7 @@ renamedt<exprt, L2> try_evaluate_pointer_comparisons(
 
   return condition;
 }
-void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace, int trace_index){
+void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace){
   printf("\n symex_goto_retrace is called\n");
   if(trace_index >= static_cast<int>(trace.size())){
     state.reachable = false;
@@ -328,6 +329,7 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace, int 
     log.debug() << "Following next instruction"
                 << log.eom;
   }
+  trace_index++;
   return;
 }
 
