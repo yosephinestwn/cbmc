@@ -76,7 +76,7 @@ std::vector<int> optionst::is_set_retrace(bool doing_path_exploration, bool retr
   }
 
   // Option --paths is active but --retrace is not
-  if(doing_path_exploration && !retracing) return std::vector>int>();
+  if(doing_path_exploration && !retracing) return std::vector<int>();
 
   //Both options --paths and --retrace are active
   auto value_list = option_map.at("retrace");
