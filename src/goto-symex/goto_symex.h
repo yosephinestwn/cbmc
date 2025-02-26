@@ -317,7 +317,9 @@ protected:
   /// Symbolically execute a GOTO instruction
   /// \param state: Symbolic execution state for current instruction
   virtual void symex_goto(statet &state);
-
+  /// Retrace the given trace and symbolically execute the path based on this trace
+  /// \param state: Symbolic execution state for current instruction
+  /// \param trace: The trace given thorugh the command line by user
   void symex_goto_retrace(statet &state, std::vector<int> trace);
   /// Symbolically execute a GOTO instruction in the context of unreachable code
   /// \param state: Symbolic execution state for current instruction

@@ -66,12 +66,19 @@ bool optionst::is_set(const std::string &option) const
   return option_map.find(option) != option_map.end();
 }
 
-std::vector<int> optionst::is_set_retrace(bool doing_path_exploration) const
+std::vector<int> optionst::is_set_retrace(bool doing_path_exploration, bool retracing) const
 {
-  if(!doing_path_exploration) {
+  // Option --retrace is active but --paths is not
+  if(!doing_path_exploration && retracing)
+  {
     std::cerr << "The option '--paths' should be used together with '--retrace'!" << '\n';
     exit(CPROVER_EXIT_USAGE_ERROR);
   }
+
+  // Option --paths is active but --retrace is not
+  if(doing_path_exploration && !retracing) return std::vector>int>();
+
+  //Both options --paths and --retrace are active
   auto value_list = option_map.at("retrace");
   if (value_list.empty() || value_list.size() == 0)
   {
@@ -85,7 +92,9 @@ std::vector<int> optionst::is_set_retrace(bool doing_path_exploration) const
     exit(CPROVER_EXIT_USAGE_ERROR);
   }
   std::vector<int> trace;
-  for(char& c : trace_target) {
+  for(char& c : trace_target)
+  {
+    //The trace should only contain 0 and 1
     if (c == '0' || c == '1')
     {
       trace.push_back(c - '0');

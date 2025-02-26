@@ -27,6 +27,8 @@ struct symex_configt final
 
   std::vector<int> trace_target;
 
+  bool retracing;
+
   bool allow_pointer_unsoundness;
 
   bool constant_propagation;
