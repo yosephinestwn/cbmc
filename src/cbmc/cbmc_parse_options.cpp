@@ -181,6 +181,7 @@ void cbmc_parse_optionst::get_command_line_options(optionst &options)
         << messaget::eom;
       exit(CPROVER_EXIT_USAGE_ERROR);
     }
+    options.set_option("print-state-trace", true);
   }
 
   // We want to warn the user that if we are using standard checks (that enables
