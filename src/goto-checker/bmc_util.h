@@ -183,7 +183,9 @@ void run_property_decider(
   "(paths):"                                                                   \
   "(show-symex-strategies)"                                                    \
   "(depth):"                                                                   \
-  "(retrace):"                                                                             \
+  "(retrace):"                                                                 \
+  "(print-state-trace)"                                                        \
+  "(trace-target-examples)"                                                     \
   "(max-field-sensitivity-array-size):"                                        \
   "(no-array-field-sensitivity)"                                               \
   "(graphml-witness):"                                                         \
@@ -198,6 +200,9 @@ void run_property_decider(
 #define HELP_BMC \
   " {y--retrace} [target trace] \t "                                           \
   "run a retrospective verification on a single path\n"                        \
+  " {y--trace-target-examples} \t list example for use with {y--retrace}\n"    \
+  " {y--print-state-trace} \t "                                                \
+  "print all state traces of the paths that the program runs\n"                \
   " {y--paths} [strategy] \t explore paths one at a time\n"                    \
   " {y--show-symex-strategies} \t list strategies for use with {y--paths}\n"   \
   " {y--show-goto-symex-steps} \t show which steps symex travels, includes "   \

@@ -34,7 +34,7 @@ public:
 
   /// N.B. opts.is_set("foo") does not imply opts.get_bool_option("foo")
   bool is_set(const std::string &option) const;
-  std::vector<int> is_set_retrace(bool doing_path_exploration, bool retracing) const;
+  std::vector<int> is_set_retrace(bool retracing) const;
 
   void set_option(const std::string &option, const bool value);
   void set_option(const std::string &option, const int value);

@@ -171,9 +171,13 @@ void cbmc_parse_optionst::get_command_line_options(optionst &options)
   if (cmdline.isset("retrace"))
   {
     options.set_option("retrace", cmdline.get_value("retrace"));
+  }
+
+  if (cmdline.isset("print-state-trace"))
+  {
     if (!cmdline.isset("paths")){
       log.error()
-        << "--retrace and --paths should be given together"
+        << "--print-state-trace and --paths should be given together"
         << messaget::eom;
       exit(CPROVER_EXIT_USAGE_ERROR);
     }
@@ -242,6 +246,17 @@ void cbmc_parse_optionst::get_command_line_options(optionst &options)
   if(cmdline.isset("show-symex-strategies"))
   {
     log.status() << show_path_strategies() << messaget::eom;
+    exit(CPROVER_EXIT_SUCCESS);
+  }
+
+  if (cmdline.isset("trace-target-examples"))
+  {
+    log.status() << "Only accept a string, which contains '0' and '1'\n"
+                    "Accepted input example: --retrace 1001\n"
+                    "Unaccepted examples: \n"
+                    "\t --retrace a0\n"
+                    "\t --retrace 0123\n"
+                    "\t --retrace\n" << messaget::eom;
     exit(CPROVER_EXIT_SUCCESS);
   }
 

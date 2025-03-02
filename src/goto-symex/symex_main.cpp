@@ -31,8 +31,9 @@ Author: Daniel Kroening, kroening@kroening.com
 symex_configt::symex_configt(const optionst &options)
   : max_depth(options.get_unsigned_int_option("depth")),
     doing_path_exploration(options.is_set("paths")),
-    trace_target(options.is_set_retrace(options.is_set("paths"), options.is_set("retrace"))),
+    trace_target(options.is_set_retrace(options.is_set("retrace"))),
     retracing(options.is_set("retrace")),
+    print_state_trace(option.is_set("print-state-trace")),
     allow_pointer_unsoundness(
       options.get_bool_option("allow-pointer-unsoundness")),
     constant_propagation(options.get_bool_option("propagation")),
@@ -395,6 +396,10 @@ symbol_tablet goto_symext::resume_symex_from_saved_state(
   // Do NOT do the same initialization that `symex_with_state` does for a
   // fresh state, as that would clobber the saved state's program counter
   auto result = symex_with_state(state, get_goto_function);
+  if (symex_config.print_state_trace)
+  {
+    state.print_trace();
+  }
   return result;
 }
 
@@ -474,6 +479,10 @@ symbol_tablet goto_symext::symex_from_entry_point_of(
   state->shadow_memory.fields = fields;
 
   auto result = symex_with_state(*state, get_goto_function);
+  if (symex_config.print_state_trace)
+  {
+    (*state).print_trace();
+  }
   return result;
 }
 
@@ -648,7 +657,7 @@ void goto_symext::execute_next_instruction(
   case GOTO:
     if(state.reachable)
     {
-     if (symex_config.doing_path_exploration && symex_config.retracing)
+     if (symex_config.retracing)
      {
        symex_goto_retrace(state, symex_config.trace_target);
      }

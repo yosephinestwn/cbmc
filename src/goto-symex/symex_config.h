@@ -29,6 +29,8 @@ struct symex_configt final
 
   bool retracing;
 
+  bool print_state_trace;
+
   bool allow_pointer_unsoundness;
 
   bool constant_propagation;
