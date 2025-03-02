@@ -185,7 +185,7 @@ void run_property_decider(
   "(depth):"                                                                   \
   "(retrace):"                                                                 \
   "(print-state-trace)"                                                        \
-  "(trace-target-examples)"                                                     \
+  "(trace-target-examples)"                                                    \
   "(max-field-sensitivity-array-size):"                                        \
   "(no-array-field-sensitivity)"                                               \
   "(graphml-witness):"                                                         \
