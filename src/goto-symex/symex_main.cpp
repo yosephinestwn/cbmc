@@ -396,10 +396,11 @@ symbol_tablet goto_symext::resume_symex_from_saved_state(
   // Do NOT do the same initialization that `symex_with_state` does for a
   // fresh state, as that would clobber the saved state's program counter
   auto result = symex_with_state(state, get_goto_function);
-  if (symex_config.doing_path_exploration && symex_config.print_state_trace)
+  if (symex_config.doing_path_exploration) state.print_trace();
+  /*if (symex_config.doing_path_exploration && symex_config.print_state_trace)
   {
     state.print_trace();
-  }
+  }*/
   return result;
 }
 
@@ -479,10 +480,11 @@ symbol_tablet goto_symext::symex_from_entry_point_of(
   state->shadow_memory.fields = fields;
 
   auto result = symex_with_state(*state, get_goto_function);
-  if (symex_config.doing_path_exploration && symex_config.print_state_trace)
+  if (symex_config.doing_path_exploration) (*state).print_trace();
+  /*if (symex_config.doing_path_exploration && symex_config.print_state_trace)
   {
     (*state).print_trace();
-  }
+  }*/
   return result;
 }
 
