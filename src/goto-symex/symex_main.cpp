@@ -33,7 +33,7 @@ symex_configt::symex_configt(const optionst &options)
     doing_path_exploration(options.is_set("paths")),
     trace_target(options.is_set_retrace(options.is_set("retrace"))),
     retracing(options.is_set("retrace")),
-    print_state_trace(option.is_set("print-state-trace")),
+    print_state_trace(options.is_set("print-state-trace")),
     allow_pointer_unsoundness(
       options.get_bool_option("allow-pointer-unsoundness")),
     constant_propagation(options.get_bool_option("propagation")),
