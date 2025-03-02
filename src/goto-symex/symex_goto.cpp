@@ -339,7 +339,7 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
 
 void goto_symext::symex_goto(statet &state)
 {
-  printf("\nNormal symex_goto is called\n");
+
   PRECONDITION(state.reachable);
 
   const goto_programt::instructiont &instruction=*state.source.pc;
