@@ -26,13 +26,9 @@ Author: Daniel Kroening, kroening@kroening.com
 #include "path_storage.h"
 
 #include <algorithm>
-#include <queue>
-#include <list>
 #include <iostream>
 #include <functional>
 
-std::queue<std::reference_wrapper<goto_symex_statet>> trace_stack;
-std::list<std::reference_wrapper<goto_symex_statet>> nodes;
 int trace_index;
 
 void goto_symext::apply_goto_condition(
@@ -360,7 +356,6 @@ void goto_symext::symex_goto(statet &state)
     // next instruction
     symex_transition(state);
     state.trace.push_back(0);
-    trace_stack.push(std::ref(static_cast<goto_symex_statet&>(state)));
     return; // nothing to do
   }
 
@@ -409,7 +404,6 @@ void goto_symext::symex_goto(statet &state)
       // next instruction
       symex_transition(state);
       state.trace.push_back(0);
-      trace_stack.push(std::ref(static_cast<goto_symex_statet&>(state)));
       return;
     }
 
@@ -427,7 +421,6 @@ void goto_symext::symex_goto(statet &state)
       // next instruction
       symex_transition(state);
       state.trace.push_back(0);
-      trace_stack.push(std::ref(static_cast<goto_symex_statet&>(state)));
       return;
     }
 
@@ -440,7 +433,6 @@ void goto_symext::symex_goto(statet &state)
       }
       symex_transition(state, goto_target, true);
       state.trace.push_back(1);
-      trace_stack.push(std::ref(static_cast<goto_symex_statet&>(state)));
       return; // nothing else to do
     }
   }
@@ -462,7 +454,6 @@ void goto_symext::symex_goto(statet &state)
         instruction.code().pretty());
     symex_transition(state, instruction.get_target(), true);
     state.trace.push_back(1);
-    trace_stack.push(std::ref(static_cast<goto_symex_statet&>(state)));
     return;
   }
 
@@ -484,7 +475,6 @@ void goto_symext::symex_goto(statet &state)
     {
       symex_transition(state, goto_target, false);
       state.trace.push_back(1);
-      trace_stack.push(std::ref(static_cast<goto_symex_statet&>(state)));
       return; // nothing else to do
     }
   }
@@ -534,13 +524,12 @@ void goto_symext::symex_goto(statet &state)
     next_instruction.state.saved_target = state_pc;
     next_instruction.state.has_saved_next_instruction = true;
     next_instruction.state.trace.push_back(0);
-    trace_stack.push(std::ref(static_cast<goto_symex_statet&>(next_instruction.state)));
 
     path_storaget::patht jump_target(target, state);
     jump_target.state.saved_target = new_state_pc;
     jump_target.state.has_saved_jump_target = true;
     jump_target.state.trace.push_back(1);
-    trace_stack.push(std::ref(static_cast<goto_symex_statet&>(jump_target.state)));
+
     // `forward` tells us where the branch we're _currently_ executing is
     // pointing to; this needs to be inverted for the branch that we're saving,
     // so let its truth value for `backwards` be the same as ours for `forward`.
@@ -580,7 +569,7 @@ void goto_symext::symex_goto(statet &state)
     state.guard = guardt(false_exprt(), guard_manager);
     state.reachable = false;
     state.trace.push_back(1);
-    trace_stack.push(std::ref(static_cast<goto_symex_statet&>(state)));
+
   }
   else
   {
@@ -589,7 +578,7 @@ void goto_symext::symex_goto(statet &state)
     symex_transition(state, state_pc, backward);
 
     state.trace.push_back(1);
-    trace_stack.push(std::ref(static_cast<goto_symex_statet&>(state)));
+
 
     if(!symex_config.doing_path_exploration)
     {

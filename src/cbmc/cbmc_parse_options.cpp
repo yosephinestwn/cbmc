@@ -257,7 +257,8 @@ void cbmc_parse_optionst::get_command_line_options(optionst &options)
                     "Unaccepted examples: \n"
                     "\t --retrace a0\n"
                     "\t --retrace 0123\n"
-                    "\t --retrace\n" << messaget::eom;
+                    "\t --retrace\n"
+                    "\t --retrace 1 0"<< messaget::eom;
     exit(CPROVER_EXIT_SUCCESS);
   }
 
