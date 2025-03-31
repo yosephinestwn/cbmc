@@ -243,7 +243,7 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
     return;
   }
 
-  const goto_programt::instructiont &instruction=*state.source.pc;
+  const goto_programt::instructiont &instruction = *state.source.pc;
 
   exprt new_guard = clean_expr(instruction.condition(), state, false);
 
@@ -258,79 +258,35 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
   DATA_INVARIANT(
     !instruction.targets.empty(), "goto should have at least one target");
 
-  // we only do deterministic gotos for now
+  // Only deterministic gotos are handled
   DATA_INVARIANT(
     instruction.targets.size() == 1, "no support for non-deterministic gotos");
 
-  goto_programt::const_targett goto_target=
-    instruction.get_target();
-
+  goto_programt::const_targett goto_target = instruction.get_target();
   const bool backward = instruction.is_backwards_goto();
 
-  symex_targett::sourcet original_source=state.source;
+  symex_targett::sourcet original_source = state.source;
   goto_programt::const_targett new_state_pc;
 
-  if(trace[trace_index] == 1){
-    new_state_pc=goto_target;
-  } else {
+  // Ensure trace value determines the correct state transition
+  if(trace[trace_index] == 1)
+  {
+    new_state_pc = goto_target;
+    state.guard.add(new_guard);
+    log.debug() << "Following jump target" << log.eom;
+  }
+  else
+  {
     new_state_pc = state.source.pc;
-    new_state_pc++;
+    ++new_state_pc;
+    state.guard.add(boolean_negate(new_guard));
+    log.debug() << "Following next instruction" << log.eom;
   }
 
   symex_transition(state, new_state_pc, backward);
 
-  // produce new guard symbol
-  exprt guard_expr;
-
-  if(
-    new_guard.id() == ID_symbol ||
-    (new_guard.id() == ID_not &&
-     to_not_expr(new_guard).op().id() == ID_symbol))
-  {
-    guard_expr=new_guard;
-  }
-  else
-  {
-    symbol_exprt guard_symbol_expr =
-      symbol_exprt(statet::guard_identifier(), bool_typet());
-    exprt new_rhs = boolean_negate(new_guard);
-
-    ssa_exprt new_lhs =
-      state.rename_ssa<L1>(ssa_exprt{guard_symbol_expr}, ns).get();
-    new_lhs =
-      state.assignment(std::move(new_lhs), new_rhs, ns, true, false).get();
-
-    guardt guard{true_exprt{}, guard_manager};
-
-    log.conditional_output(
-      log.debug(),
-      [this, &new_lhs](messaget::mstreamt &mstream) {
-        mstream << "Assignment to " << new_lhs.get_identifier()
-                << " [" << pointer_offset_bits(new_lhs.type(), ns).value_or(0) << " bits]"
-                << messaget::eom;
-      });
-
-    target.assignment(
-      guard.as_expr(),
-      new_lhs, new_lhs, guard_symbol_expr,
-      new_rhs,
-      original_source,
-      symex_targett::assignment_typet::GUARD);
-
-    guard_expr = state.rename(boolean_negate(guard_symbol_expr), ns).get();
-  }
-
-  if(trace[trace_index] == 1)
-  {
-    state.guard.add(guard_expr);
-    log.debug() << "Following jump target"
-                << log.eom;
-  } else {
-    state.guard.add(boolean_negate(guard_expr));
-    log.debug() << "Following next instruction"
-                << log.eom;
-  }
-  trace_index++;
+  // Update trace index after processing
+  ++trace_index;
   return;
 }
 
