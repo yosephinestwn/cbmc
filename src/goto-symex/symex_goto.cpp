@@ -237,7 +237,9 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
   if(trace_index >= static_cast<int>(trace.size()))
   {
     // Instead of stopping, move to the next instruction
-    symex_transition(state, state.source.pc + 1, false);
+    goto_programt::const_targett state_source_pc = state.source.pc;
+    state_source_pc++;
+    symex_transition(state, state_source_pc, false);
     return;
   }
 
