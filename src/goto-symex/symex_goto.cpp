@@ -236,7 +236,8 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
   // If the retracing is done
   if(trace_index >= static_cast<int>(trace.size()))
   {
-    state.reachable = false;
+    // Instead of stopping, move to the next instruction
+    symex_transition(state, state.source.pc + 1, false);
     return;
   }
 
