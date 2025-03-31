@@ -265,7 +265,6 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
   goto_programt::const_targett goto_target = instruction.get_target();
   const bool backward = instruction.is_backwards_goto();
 
-  symex_targett::sourcet original_source = state.source;
   goto_programt::const_targett new_state_pc;
 
   // Ensure trace value determines the correct state transition
