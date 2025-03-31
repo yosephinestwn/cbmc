@@ -232,7 +232,7 @@ renamedt<exprt, L2> try_evaluate_pointer_comparisons(
 }
 void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
 {
-
+  PRECONDITION(state.reachable);
   // If the retracing is done
   if(trace_index >= static_cast<int>(trace.size()))
   {
@@ -243,7 +243,6 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
     return;
   }
 
-  PRECONDITION(state.reachable);
   const goto_programt::instructiont &instruction=*state.source.pc;
 
   exprt new_guard = clean_expr(instruction.condition(), state, false);
