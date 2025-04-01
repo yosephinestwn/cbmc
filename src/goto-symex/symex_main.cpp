@@ -655,19 +655,17 @@ void goto_symext::execute_next_instruction(
     break;
 
   case GOTO:
-    if(state.reachable)
+    if (symex_config.retracing) {
+      symex_goto_retrace(state, symex_config.trace_target);
+    }
+    else if(state.reachable)
     {
-     if (symex_config.retracing)
-     {
-       symex_goto_retrace(state, symex_config.trace_target);
-     }
-     else
-     {
        symex_goto(state);
-     }
     }
     else
+    {
       symex_unreachable_goto(state);
+    }
     break;
 
 
