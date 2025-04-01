@@ -236,7 +236,8 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
   // If the retracing is done
   if(trace_index >= static_cast<int>(trace.size()))
   {
-    state.reachable = false;
+    //state.reachable = false;
+    symex_goto(state);
     return;
   }
 
@@ -286,11 +287,11 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
     new_state_pc++;
   }
 
-  if(trace_index > 0)
+  /*if(trace_index > 0)
   {
     exprt prev_guard = state.guard.as_expr();
     state.guard.add(prev_guard);
-  }
+  }*/
 
   symex_transition(state, new_state_pc, backward);
 
