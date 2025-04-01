@@ -30,6 +30,7 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <functional>
 
 int trace_index;
+bool firstCall = true;
 
 void goto_symext::apply_goto_condition(
   goto_symex_statet &current_state,
@@ -272,14 +273,20 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
   symex_targett::sourcet original_source=state.source;
   goto_programt::const_targett new_state_pc;
 
-  if(trace[trace_index] == 1){
+  if (firstCall)
+  {
     new_state_pc=goto_target;
+    symex_transition(state, new_state_pc, backward);
+  }
+
+  if(trace[trace_index] == 1 && !firstCall){
+    new_state_pc=goto_target;
+    symex_transition(state, new_state_pc, backward);
   } else {
     new_state_pc = state.source.pc;
     new_state_pc++;
+    symex_transition(state, new_state_pc, backward);
   }
-
-  symex_transition(state, new_state_pc, backward);
 
   // produce new guard symbol
   exprt guard_expr;
@@ -332,7 +339,15 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
     log.debug() << "Following next instruction"
                 << log.eom;
   }
-  trace_index++;
+
+  if (!firstCall)
+  {
+    trace_index++;
+  }
+  if (firstCall)
+  {
+    firstCall = false;
+  }
   return;
 }
 
