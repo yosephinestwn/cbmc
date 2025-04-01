@@ -265,7 +265,7 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
 
   printf("Current instruction: %s\n", instruction.source_location().as_string().c_str());
 
-  printf("Next Goto of this instruction: %s\n", goto_target->source_location().as_string().c_str();
+  printf("Next Goto of this instruction: %s\n", goto_target->source_location().as_string().c_str());
 
   goto_programt::const_targett next_instruction = state.source.pc;
 
