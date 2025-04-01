@@ -30,7 +30,6 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <functional>
 
 int trace_index;
-bool firstCall = true;
 
 void goto_symext::apply_goto_condition(
   goto_symex_statet &current_state,
@@ -266,27 +265,27 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
 
   printf("Current instruction: %s\n", instruction.source_location().as_string().c_str());
 
-  printf("Goto target of this instruction: %s\n", goto_target->source_location().as_string().c_str());
+  printf("Next Goto of this instruction: %s\n", goto_target.source_location().as_string().c_str());
+
+  goto_programt::const_targett next_instruction = state.source.pc;
+
+  next_instruction++;
+
+  printf("Next instruction: %s\n", next_instruction.source_location().as_string().c_str());
 
   const bool backward = instruction.is_backwards_goto();
 
   symex_targett::sourcet original_source=state.source;
   goto_programt::const_targett new_state_pc;
 
-  if (firstCall)
-  {
+  if(trace[trace_index] == 1){
     new_state_pc=goto_target;
-    symex_transition(state, new_state_pc, backward);
-  }
-
-  if(trace[trace_index] == 1 && !firstCall){
-    new_state_pc=goto_target;
-    symex_transition(state, new_state_pc, backward);
   } else {
     new_state_pc = state.source.pc;
     new_state_pc++;
-    symex_transition(state, new_state_pc, backward);
   }
+
+  symex_transition(state, new_state_pc, backward);
 
   // produce new guard symbol
   exprt guard_expr;
@@ -339,15 +338,7 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
     log.debug() << "Following next instruction"
                 << log.eom;
   }
-
-  if (!firstCall)
-  {
-    trace_index++;
-  }
-  if (firstCall)
-  {
-    firstCall = false;
-  }
+  trace_index++;
   return;
 }
 
