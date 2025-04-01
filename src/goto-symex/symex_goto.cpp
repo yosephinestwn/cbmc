@@ -271,7 +271,7 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
 
   next_instruction++;
 
-  printf("Next instruction: %s\n", next_instruction->source_location().as_string().c_str();
+  printf("Next instruction: %s\n", next_instruction->source_location().as_string().c_str());
 
   const bool backward = instruction.is_backwards_goto();
 
