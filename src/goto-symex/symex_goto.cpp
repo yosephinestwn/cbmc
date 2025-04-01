@@ -236,7 +236,6 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
   // If the retracing is done
   if(trace_index >= static_cast<int>(trace.size()))
   {
-    // Instead of stopping, move to the next instruction
     state.reachable = false;
     return;
   }
@@ -288,6 +287,13 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
   }
 
   symex_transition(state, new_state_pc, backward);
+
+
+  if(trace_index > 0)
+  {
+    exprt prev_guard = state.guard.as_expr();
+    state.guard.add(prev_guard);
+  }
 
   // produce new guard symbol
   exprt guard_expr;
