@@ -234,12 +234,6 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
 {
   PRECONDITION(state.reachable);
   // If the retracing is done
-  if(trace_index >= static_cast<int>(trace.size()))
-  {
-    //state.reachable = false;
-    symex_goto(state);
-    return;
-  }
 
   const goto_programt::instructiont &instruction=*state.source.pc;
 
@@ -336,7 +330,7 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
     guard_expr = state.rename(boolean_negate(guard_symbol_expr), ns).get();
   }
 
-  if(trace[trace_index] == 1)
+  if(trace_index < static_cast<int>(trace.size()) && trace[trace_index] == 1)
   {
     state.guard.add(guard_expr);
     log.debug() << "Following jump target"
