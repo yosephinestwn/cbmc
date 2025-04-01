@@ -332,14 +332,31 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
 
   if(trace_index < static_cast<int>(trace.size()) && trace[trace_index] == 1)
   {
-    state.guard.add(guard_expr);
     log.debug() << "Following jump target"
                 << log.eom;
-  } else {
-    state.guard.add(boolean_negate(guard_expr));
+    if(!backward)
+      state.guard.add(guard_expr);
+    else
+      state.guard.add(boolean_negate(guard_expr));
+  }
+  else
+  {
     log.debug() << "Following next instruction"
                 << log.eom;
+    goto_statet &new_state = goto_state_list.back().second;
+    if(!backward)
+    {
+      new_state.guard.add(guard_expr);
+      state.guard.add(boolean_negate(guard_expr));
+    }
+    else
+    {
+      state.guard.add(guard_expr);
+      new_state.guard.add(boolean_negate(guard_expr));
+    }
   }
+
+
   trace_index++;
   return;
 }
