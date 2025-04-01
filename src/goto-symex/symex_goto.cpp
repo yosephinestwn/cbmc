@@ -242,7 +242,8 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
   renamedt<exprt, L2> renamed_guard = state.rename(std::move(new_guard), ns);
   renamed_guard = try_evaluate_pointer_comparisons(
     std::move(renamed_guard), state.value_set, language_mode, ns);
-
+  if(symex_config.simplify_opt)
+    renamed_guard.simplify(ns);
   new_guard = renamed_guard.get();
 
   target.goto_instruction(state.guard.as_expr(), renamed_guard, state.source);
@@ -276,9 +277,11 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
 
   if(trace[trace_index] == 1){
     new_state_pc=goto_target;
+    symex_transition(state, new_state_pc, backward);
   } else {
     new_state_pc = state.source.pc;
     new_state_pc++;
+    symex_transition(state);
   }
 
   /*if(trace_index > 0)
@@ -287,7 +290,6 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
     state.guard.add(prev_guard);
   }*/
 
-  symex_transition(state, new_state_pc, backward);
 
   // produce new guard symbol
   exprt guard_expr;
