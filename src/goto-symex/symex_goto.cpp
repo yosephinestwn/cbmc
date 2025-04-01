@@ -237,9 +237,7 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
   if(trace_index >= static_cast<int>(trace.size()))
   {
     // Instead of stopping, move to the next instruction
-    goto_programt::const_targett state_source_pc = state.source.pc;
-    state_source_pc++;
-    symex_transition(state, state_source_pc, false);
+    state.reachable = false;
     return;
   }
 
@@ -264,6 +262,10 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
 
   goto_programt::const_targett goto_target=
     instruction.get_target();
+
+  printf("Current instruction: %s\n", instruction.source_location().as_string().c_str());
+
+  printf("Goto target of this instruction: %s\n", goto_target->source_location().as_string().c_str());
 
   const bool backward = instruction.is_backwards_goto();
 
