@@ -277,116 +277,62 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
 
   if(trace[trace_index] == 1){
     new_state_pc=goto_target;
+    symex_transition(state, new_state_pc, backward);
   } else {
-    new_state_pc = state.source.pc;
-    new_state_pc++;
+    symex_transition(state);
   }
 
-  // put a copy of the current state into the state-queue, to be used by
-  // merge_gotos when we visit new_state_pc
-  framet::goto_state_listt &goto_state_list =
-    state.call_stack().top().goto_state_map[new_state_pc];
+  // produce new guard symbol
+  exprt guard_expr;
 
-  // On an unconditional GOTO we don't need our state, as it will be overwritten
-  // by merge_goto. Therefore we move it onto goto_state_list instead of copying
-  // as usual.
-  if(new_guard.is_true())
+  if(
+    new_guard.id() == ID_symbol ||
+    (new_guard.id() == ID_not &&
+     to_not_expr(new_guard).op().id() == ID_symbol))
   {
-    // The move here only moves goto_statet, the base class of goto_symex_statet
-    // and not the entire thing.
-    goto_state_list.emplace_back(state.source, std::move(state));
-
-    symex_transition(state, new_state_pc, backward);
-
-    state.guard = guardt(false_exprt(), guard_manager);
-    state.reachable = false;
+    guard_expr=new_guard;
   }
   else
   {
-    goto_state_list.emplace_back(state.source, state);
+    symbol_exprt guard_symbol_expr =
+      symbol_exprt(statet::guard_identifier(), bool_typet());
+    exprt new_rhs = boolean_negate(new_guard);
 
-    symex_transition(state, new_state_pc, backward);
+    ssa_exprt new_lhs =
+      state.rename_ssa<L1>(ssa_exprt{guard_symbol_expr}, ns).get();
+    new_lhs =
+      state.assignment(std::move(new_lhs), new_rhs, ns, true, false).get();
 
+    guardt guard{true_exprt{}, guard_manager};
 
-    auto &taken_state = backward ? state : goto_state_list.back().second;
-    auto &not_taken_state = backward ? goto_state_list.back().second : state;
+    log.conditional_output(
+      log.debug(),
+      [this, &new_lhs](messaget::mstreamt &mstream) {
+        mstream << "Assignment to " << new_lhs.get_identifier()
+                << " [" << pointer_offset_bits(new_lhs.type(), ns).value_or(0) << " bits]"
+                << messaget::eom;
+      });
 
-    apply_goto_condition(
-      state,
-      taken_state,
-      not_taken_state,
-      instruction.condition(),
-      new_guard,
-      ns);
+    target.assignment(
+      guard.as_expr(),
+      new_lhs, new_lhs, guard_symbol_expr,
+      new_rhs,
+      original_source,
+      symex_targett::assignment_typet::GUARD);
 
-    // produce new guard symbol
-    exprt guard_expr;
-
-    if(
-      new_guard.id() == ID_symbol ||
-      (new_guard.id() == ID_not &&
-       to_not_expr(new_guard).op().id() == ID_symbol))
-    {
-      guard_expr=new_guard;
-    }
-    else
-    {
-      symbol_exprt guard_symbol_expr =
-        symbol_exprt(statet::guard_identifier(), bool_typet());
-      exprt new_rhs = boolean_negate(new_guard);
-
-      ssa_exprt new_lhs =
-        state.rename_ssa<L1>(ssa_exprt{guard_symbol_expr}, ns).get();
-      new_lhs =
-        state.assignment(std::move(new_lhs), new_rhs, ns, true, false).get();
-
-      guardt guard{true_exprt{}, guard_manager};
-
-      log.conditional_output(
-        log.debug(),
-        [this, &new_lhs](messaget::mstreamt &mstream) {
-          mstream << "Assignment to " << new_lhs.get_identifier()
-                  << " [" << pointer_offset_bits(new_lhs.type(), ns).value_or(0) << " bits]"
-                  << messaget::eom;
-        });
-
-      target.assignment(
-        guard.as_expr(),
-        new_lhs, new_lhs, guard_symbol_expr,
-        new_rhs,
-        original_source,
-        symex_targett::assignment_typet::GUARD);
-
-      guard_expr = state.rename(boolean_negate(guard_symbol_expr), ns).get();
-    }
-
-    if(trace_index < static_cast<int>(trace.size()) && trace[trace_index] == 1)
-    {
-      log.debug() << "Following jump target"
-                  << log.eom;
-      if(!backward)
-        state.guard.add(guard_expr);
-      else
-        state.guard.add(boolean_negate(guard_expr));
-    }
-    else
-    {
-      log.debug() << "Following next instruction"
-                  << log.eom;
-      goto_statet &new_state = goto_state_list.back().second;
-      if(!backward)
-      {
-        new_state.guard.add(guard_expr);
-        state.guard.add(boolean_negate(guard_expr));
-      }
-      else
-      {
-        state.guard.add(guard_expr);
-        new_state.guard.add(boolean_negate(guard_expr));
-      }
-    }
+    guard_expr = state.rename(boolean_negate(guard_symbol_expr), ns).get();
   }
 
+  if(trace_index < static_cast<int>(trace.size()) && trace[trace_index] == 1)
+  {
+    state.guard.add(guard_expr);
+    log.debug() << "Following jump target"
+                << log.eom;
+  } else {
+    state.guard.add(boolean_negate(guard_expr));
+    log.debug() << "Following next instruction"
+                << log.eom;
+  }
   trace_index++;
   return;
 }
