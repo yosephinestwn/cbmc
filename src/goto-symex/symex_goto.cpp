@@ -277,19 +277,10 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
 
   if(trace[trace_index] == 1){
     new_state_pc=goto_target;
-    symex_transition(state, new_state_pc, backward);
   } else {
     new_state_pc = state.source.pc;
     new_state_pc++;
-    symex_transition(state);
   }
-
-  /*if(trace_index > 0)
-  {
-    exprt prev_guard = state.guard.as_expr();
-    state.guard.add(prev_guard);
-  }*/
-
 
   // put a copy of the current state into the state-queue, to be used by
   // merge_gotos when we visit new_state_pc
@@ -305,20 +296,16 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
     // and not the entire thing.
     goto_state_list.emplace_back(state.source, std::move(state));
 
-    symex_transition(state, state_pc, backward);
+    symex_transition(state, new_state_pc, backward);
 
     state.guard = guardt(false_exprt(), guard_manager);
     state.reachable = false;
-    state.trace.push_back(1);
-
   }
   else
   {
     goto_state_list.emplace_back(state.source, state);
 
-    symex_transition(state, state_pc, backward);
-
-    state.trace.push_back(1);
+    symex_transition(state, new_state_pc, backward);
 
 
     auto &taken_state = backward ? state : goto_state_list.back().second;
