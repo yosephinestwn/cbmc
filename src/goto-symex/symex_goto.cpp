@@ -260,22 +260,10 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
 
   const bool backward = instruction.is_backwards_goto();
 
-  printf("Current conditional branching: %d\n", trace[trace_index]);
-
-  printf("Current instruction: %s\n", instruction.source_location().as_string().c_str());
-
-  printf("Next Goto of this instruction: %s\n", goto_target->source_location().as_string().c_str());
-
-  goto_programt::const_targett next_instruction = state.source.pc;
-
-  next_instruction++;
-
-  printf("Next instruction: %s\n", next_instruction->source_location().as_string().c_str());
-
   symex_targett::sourcet original_source=state.source;
   goto_programt::const_targett new_state_pc;
 
-  if(trace[trace_index] == 1 && trace_index < static_cast<int>(trace.size())){
+  if(trace_index < static_cast<int>(trace.size()) && trace[trace_index] == 1){
     // Jump to the jump target if the input is '1'
     new_state_pc=goto_target;
     symex_transition(state, new_state_pc, backward);
