@@ -275,7 +275,7 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
   symex_targett::sourcet original_source=state.source;
   goto_programt::const_targett new_state_pc;
 
-  if(trace_index < static_cast<int>(trace.size()) && trace[trace_index] == 1){
+  if(trace[trace_index] == 1){
     // Jump to the jump target if the input is '1'
     new_state_pc=goto_target;
     symex_transition(state, new_state_pc, backward);
