@@ -233,7 +233,6 @@ renamedt<exprt, L2> try_evaluate_pointer_comparisons(
 void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
 {
   PRECONDITION(state.reachable);
-  // If the retracing is done
 
   const goto_programt::instructiont &instruction=*state.source.pc;
 
@@ -259,6 +258,19 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
     instruction.get_target();
 
   const bool backward = instruction.is_backwards_goto();
+
+  printf("Current conditional branching: %d\n", trace[trace_index]);
+
+  printf("Current instruction: %s\n", instruction.source_location().as_string().c_str());
+
+  printf("Next Goto of this instruction: %s\n", goto_target->source_location().as_string().c_str());
+
+  goto_programt::const_targett next_instruction = state.source.pc;
+
+  next_instruction++;
+
+  printf("Next instruction: %s\n", next_instruction->source_location().as_string().c_str());
+
 
   symex_targett::sourcet original_source=state.source;
   goto_programt::const_targett new_state_pc;
