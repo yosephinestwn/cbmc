@@ -28,6 +28,8 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <algorithm>
 #include <iostream>
 #include <functional>
+#include <string>
+#include <cstdio>
 
 int trace_index;
 
@@ -259,18 +261,76 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
 
   const bool backward = instruction.is_backwards_goto();
 
-  printf("Current conditional branching: %d\n", trace[trace_index]);
+  //Printing the path if --show-retrace-flow is active
+  if (symex_config.show_retrace_flow)
+  {
+    std::string file = state.source.pc->source_location().get_file().c_str();
+    std::string current_line = state.source.pc->source_location().get_line().c_str();
+    std::string goto_file = goto_target->source_location().get_file().c_str();
+    std::string goto_line = goto_target->source_location().get_line().c_str();
 
-  printf("Current instruction: %s\n", instruction.source_location().as_string().c_str());
+    goto_programt::const_targett next_instruction = state.source.pc;
+    next_instruction++;
+    std::string next_file = next_instruction->source_location().get_file().c_str();
+    std::string next_line = next_instruction->source_location().get_line().c_str();
 
-  printf("Next Goto of this instruction: %s\n", goto_target->source_location().as_string().c_str());
+    bool is_goto_cross_file = (file != goto_file);
+    bool is_next_cross_file = (file != next_file);
 
-  goto_programt::const_targett next_instruction = state.source.pc;
-
-  next_instruction++;
-
-  printf("Next instruction: %s\n", next_instruction->source_location().as_string().c_str());
-
+    if (trace_index < static_cast<int>(trace.size()))
+    {
+      if (trace[trace_index] == 1)
+      {
+        if (is_goto_cross_file || is_next_cross_file)
+        {
+          //Also prints the name of the destination file if the files is different
+          printf("Retrace 1/GOTO in %s:%s to (%s:%s or) *%s:%s*\n",
+                 file.c_str(), current_line.c_str(),
+                 next_file.c_str(), next_line.c_str(),
+                 goto_file.c_str(), goto_line.c_str());
+        }
+        else
+        {
+          //Does not
+          printf("Retrace 1/GOTO in %s:%s to (:%s or) *:%s*\n",
+                 file.c_str(), current_line.c_str(),
+                 next_line.c_str(), goto_line.c_str());
+        }
+      }
+      else
+      {
+        if (is_goto_cross_file || is_next_cross_file)
+        {
+          printf("Retrace 0/NEXT in %s:%s to *%s:%s* (or %s:%s)\n",
+                 file.c_str(), current_line.c_str(),
+                 next_file.c_str(), next_line.c_str(),
+                 goto_file.c_str(), goto_line.c_str());
+        }
+        else
+        {
+          printf("Retrace 0/NEXT in %s:%s to *:%s* (or :%s)\n",
+                 file.c_str(), current_line.c_str(),
+                 next_line.c_str(), goto_line.c_str());
+        }
+      }
+    }
+    else
+    {
+      if (is_goto_cross_file || is_next_cross_file)
+      {
+        printf("Retrace 0/DEFAULT in %s:%s to *%s:%s* (or %s:%s)\n",
+               file.c_str(), current_line.c_str(),
+               next_file.c_str(), next_line.c_str(),
+               goto_file.c_str(), goto_line.c_str());
+      }
+      else
+      {
+        printf("Retrace 0/DEFAULT in %s:%s to *:%s* (or :%s)\n",
+               file.c_str(), current_line.c_str(),
+               next_line.c_str(), goto_line.c_str());
+      }
+    }
+  }
 
   symex_targett::sourcet original_source=state.source;
   goto_programt::const_targett new_state_pc;

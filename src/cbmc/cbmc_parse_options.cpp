@@ -173,6 +173,18 @@ void cbmc_parse_optionst::get_command_line_options(optionst &options)
     options.set_option("retrace", cmdline.get_value("retrace"));
   }
 
+  if (cmdline.isset("show-retrace-flow"))
+  {
+    if (!cmdline.isset("retrace"))
+    {
+      log.error()
+        << "--show-retrace-flow and --retrace should be given together"
+        << messaget::eom;
+      exit(CPROVER_EXIT_USAGE_ERROR);
+    }
+    options.set_option("show-retrace-flow", true);
+  }
+
   if (cmdline.isset("print-state-trace"))
   {
     if (!cmdline.isset("paths")){

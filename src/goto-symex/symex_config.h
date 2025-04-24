@@ -29,6 +29,8 @@ struct symex_configt final
 
   bool retracing;
 
+  bool show_retrace_flow;
+
   bool print_state_trace;
 
   bool allow_pointer_unsoundness;
