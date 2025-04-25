@@ -277,6 +277,24 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
     bool is_goto_cross_file = (file != goto_file);
     bool is_next_cross_file = (file != next_file);
 
+    if (file.empty())
+      file = "<unknown>";
+
+    if (current_line.empty())
+      current_line = "?";
+
+    if (goto_file.empty())
+      goto_file = "<unknown>";
+
+    if (goto_line.empty())
+      goto_line = "?";
+
+    if (next_file.empty())
+      next_file = "<unknown>";
+
+    if (next_line.empty())
+      next_line = "?";
+
     //Execute the instruction based on the input
     if (trace_index < static_cast<int>(trace.size()))
     {
@@ -325,7 +343,7 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
       //Also prints the name of the destination file if the files is different
       if (is_goto_cross_file || is_next_cross_file)
       {
-        printf("Retrace 0/DEFAULT in %s:%s to *%s:%s* (or %s:%s)\n",
+        printf("DEFAULT 0/NEXT in %s:%s to *%s:%s* (or %s:%s)\n",
                file.c_str(), current_line.c_str(),
                goto_file.c_str(), goto_line.c_str(),
                next_file.c_str(), next_line.c_str());
@@ -333,7 +351,7 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
       //Does not print the file name for the same files
       else
       {
-        printf("Retrace 0/DEFAULT in %s:%s to *:%s* (or :%s)\n",
+        printf("DEFAULT 0/NEXT in %s:%s to *:%s* (or :%s)\n",
                file.c_str(), current_line.c_str(),
                goto_line.c_str(), next_line.c_str());
       }
