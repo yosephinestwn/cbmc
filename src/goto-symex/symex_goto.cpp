@@ -327,7 +327,8 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
           goto_line.c_str());
       }
     }
-    // Execute the next instruction if the input is already iterated until the last index or if the input is 0
+    // Execute the next instruction if the input is already iterated
+    // until the last index or if the input is 0
     else
     {
       //Also prints the name of the destination file if the files is different
