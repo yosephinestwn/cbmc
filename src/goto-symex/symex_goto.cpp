@@ -262,98 +262,96 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
   const bool backward = instruction.is_backwards_goto();
 
   //Printing the path if --show-retrace-flow is active
-  if (symex_config.show_retrace_flow)
+  if(symex_config.show_retrace_flow)
   {
     std::string file = state.source.pc->source_location().get_file().c_str();
-    std::string current_line = state.source.pc->source_location().get_line().c_str();
+    std::string current_line =
+      state.source.pc->source_location().get_line().c_str();
     std::string goto_file = goto_target->source_location().get_file().c_str();
     std::string goto_line = goto_target->source_location().get_line().c_str();
 
     goto_programt::const_targett next_instruction = state.source.pc;
     next_instruction++;
-    std::string next_file = next_instruction->source_location().get_file().c_str();
-    std::string next_line = next_instruction->source_location().get_line().c_str();
+    std::string next_file =
+      next_instruction->source_location().get_file().c_str();
+    std::string next_line =
+      next_instruction->source_location().get_line().c_str();
 
     bool is_goto_cross_file = (file != goto_file);
     bool is_next_cross_file = (file != next_file);
 
-    if (file.empty())
+    if(file.empty())
       file = "<unknown>";
 
-    if (current_line.empty())
+    if(current_line.empty())
       current_line = "?";
 
-    if (goto_file.empty())
+    if(goto_file.empty())
       goto_file = "<unknown>";
 
-    if (goto_line.empty())
+    if(goto_line.empty())
       goto_line = "?";
 
-    if (next_file.empty())
+    if(next_file.empty())
       next_file = "<unknown>";
 
-    if (next_line.empty())
+    if(next_line.empty())
       next_line = "?";
 
     //Execute the instruction based on the input
-    if (trace_index < static_cast<int>(trace.size()))
+
+    //Jump to GOTO
+    if(trace_index < static_cast<int>(trace.size()) && trace[trace_index] == 1)
     {
-      //Jump to GOTO
-      if (trace[trace_index] == 1)
-      {
-        if (is_goto_cross_file || is_next_cross_file)
-        {
-          //Also prints the name of the destination file if the files is different
-          printf("Retrace 1/GOTO in %s:%s to (%s:%s or) *%s:%s*\n",
-                 file.c_str(), current_line.c_str(),
-                 goto_file.c_str(), goto_line.c_str(),
-                 next_file.c_str(), next_line.c_str());
-        }
-        else
-        {
-          //Does not print the file name for the same files
-          printf("Retrace 1/GOTO in %s:%s to (:%s or) *:%s*\n",
-                 file.c_str(), current_line.c_str(),
-                 goto_line.c_str(), next_line.c_str());
-        }
-      }
-      //Execute next instruction
-      else
+      if(is_goto_cross_file || is_next_cross_file)
       {
         //Also prints the name of the destination file if the files is different
-        if (is_goto_cross_file || is_next_cross_file)
-        {
-          printf("Retrace 0/NEXT in %s:%s to *%s:%s* (or %s:%s)\n",
-                 file.c_str(), current_line.c_str(),
-                 goto_file.c_str(), goto_line.c_str(),
-                 next_file.c_str(), next_line.c_str());
-        }
+        printf(
+          "Retrace 1/GOTO in %s:%s to (%s:%s or) "
+          "\033[4m\033[1m%s:%s\033[0m\n",
+          file.c_str(),
+          current_line.c_str(),
+          next_file.c_str(),
+          next_line.c_str(),
+          goto_file.c_str(),
+          goto_line.c_str());
+      }
+      else
+      {
         //Does not print the file name for the same files
-        else
-        {
-          printf("Retrace 0/NEXT in %s:%s to *:%s* (or :%s)\n",
-                 file.c_str(), current_line.c_str(),
-                 goto_line.c_str(), next_line.c_str());
-        }
+        printf(
+          "Retrace 1/GOTO in %s:%s to (:%s or) \033[4m\033[1m:%s\033[0m\n",
+          file.c_str(),
+          current_line.c_str(),
+          next_line.c_str(),
+          goto_line.c_str());
       }
     }
-    // Execute the next instruction if the input is already iterated until the last index
+    // Execute the next instruction if the input is already iterated until the last index or if the input is 0
     else
     {
       //Also prints the name of the destination file if the files is different
-      if (is_goto_cross_file || is_next_cross_file)
+      if(is_goto_cross_file || is_next_cross_file)
       {
-        printf("DEFAULT 0/NEXT in %s:%s to *%s:%s* (or %s:%s)\n",
-               file.c_str(), current_line.c_str(),
-               goto_file.c_str(), goto_line.c_str(),
-               next_file.c_str(), next_line.c_str());
+        printf(
+          "Retrace 0/NEXT in %s:%s to \033[4m\033[1m%s:%s\033[0m (or "
+          "%s:%s)\n",
+          file.c_str(),
+          current_line.c_str(),
+          next_file.c_str(),
+          next_line.c_str(),
+          goto_file.c_str(),
+          goto_line.c_str());
       }
       //Does not print the file name for the same files
       else
       {
-        printf("DEFAULT 0/NEXT in %s:%s to *:%s* (or :%s)\n",
-               file.c_str(), current_line.c_str(),
-               goto_line.c_str(), next_line.c_str());
+        printf(
+          "Retrace 0/NEXT in %s:%s to \033[4m\033[1m:%s\033[0m (or :%s)\n",
+          file.c_str(),
+          current_line.c_str(),
+          next_line.c_str(),
+          goto_line.c_str());
       }
     }
   }
