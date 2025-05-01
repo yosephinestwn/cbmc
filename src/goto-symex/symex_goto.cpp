@@ -261,7 +261,6 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
 
   const bool backward = instruction.is_backwards_goto();
 
-  //Printing the path if --show-retrace-flow is active
   if(symex_config.show_retrace_flow)
   {
     std::string file = state.source.pc->source_location().get_file().c_str();
@@ -307,36 +306,33 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
       {
         //Also prints the name of the destination file if the files is different
         printf(
-          "Retrace 1/GOTO in %s:%s to (%s:%s or) "
-          "\033[4m\033[1m%s:%s\033[0m\n",
+          "Retrace 1/GOTO in %s:%s to %s:%s (not %s:%s)\n",
           file.c_str(),
           current_line.c_str(),
-          next_file.c_str(),
-          next_line.c_str(),
           goto_file.c_str(),
-          goto_line.c_str());
+          goto_line.c_str(),
+          next_file.c_str(),
+          next_line.c_str());
       }
       else
       {
         //Does not print the file name for the same files
         printf(
-          "Retrace 1/GOTO in %s:%s to (:%s or) \033[4m\033[1m:%s\033[0m\n",
+          "Retrace 1/GOTO in %s:%s to :%s (not :%s)\n",
           file.c_str(),
           current_line.c_str(),
-          next_line.c_str(),
-          goto_line.c_str());
+          goto_line.c_str(),
+          next_line.c_str());
       }
     }
-    // Execute the next instruction if the input is already iterated
-    // until the last index or if the input is 0
+    // Execute the next instruction if the input is already iterated until the last index or if the input is 0
     else
     {
       //Also prints the name of the destination file if the files is different
       if(is_goto_cross_file || is_next_cross_file)
       {
         printf(
-          "Retrace 0/NEXT in %s:%s to \033[4m\033[1m%s:%s\033[0m (or "
-          "%s:%s)\n",
+          "Retrace 0/NEXT in %s:%s to %s:%s (not %s:%s)\n",
           file.c_str(),
           current_line.c_str(),
           next_file.c_str(),
@@ -348,7 +344,7 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
       else
       {
         printf(
-          "Retrace 0/NEXT in %s:%s to \033[4m\033[1m:%s\033[0m (or :%s)\n",
+          "Retrace 0/NEXT in %s:%s to :%s (not :%s)\n",
           file.c_str(),
           current_line.c_str(),
           next_line.c_str(),
@@ -364,7 +360,9 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
     // Jump to the jump target if the input is '1'
     new_state_pc=goto_target;
     symex_transition(state, new_state_pc, backward);
-  } else {
+  }
+  else
+  {
     // Jump to the next instruction
     new_state_pc = state.source.pc;
     new_state_pc++;
@@ -414,10 +412,14 @@ void goto_symext::symex_goto_retrace(statet &state, std::vector<int> trace)
 
   if(trace_index < static_cast<int>(trace.size()) && trace[trace_index] == 1)
   {
+    symex_assume_l2(state, guard_expr);
     state.guard.add(guard_expr);
     log.debug() << "Following jump target"
                 << log.eom;
-  } else {
+  }
+  else
+  {
+    symex_assume_l2(state, boolean_negate(guard_expr));
     state.guard.add(boolean_negate(guard_expr));
     log.debug() << "Following next instruction"
                 << log.eom;

@@ -203,7 +203,6 @@ void run_property_decider(
   "run a retrospective verification on a single path\n"                        \
   " {y--show-retrace-flow}\t "                                                 \
   "Prints the executed path based on the input of {y--retrace},"               \
-  " next executed line is marked with ()\n"                                    \
   " {y--trace-target-examples} \t list example for use with {y--retrace}\n"    \
   " {y--print-state-trace} \t "                                                \
   "print all state traces of the paths that the program runs\n"                \
